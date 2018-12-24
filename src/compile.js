@@ -1,4 +1,5 @@
-import Watcher from './watcher.js'
+import Watcher from './reactive/watcher.js'
+import * as is from './utils/is.js'
 
 class Compile {
   constructor (view, el) {
@@ -16,7 +17,6 @@ class Compile {
     this.compileElement(this.template)
 
     if (this.el) {
-      console.log('el', this.el)
       this.el.appendChild(this.template)
     }
 
@@ -38,9 +38,9 @@ class Compile {
       const regx = /\{\{(.*)\}\}/
       const text = child.textContent
 
-      if (this.isElementNode(child)) {
+      if (is.elementNode(child)) {
         this.compile(child)
-      } else if (this.isTextNode(child) && regx.test(text)) {
+      } else if (is.textNode(child) && regx.test(text)) {
         this.compileText(child, regx.exec(text)[1].trim())
       }
 
@@ -81,43 +81,19 @@ class Compile {
     for (let i = 0; i < attrs.length; i++) {
       const attr = attrs[i]
 
-      if (this.isModelDirective(attr.name)) {
+      if (is.modelDirective(attr.name)) {
         let tagName = node.tagName.toLowerCase()
         console.log('isModelDirective', tagName, node)
-      } else if (this.isLoopDirective(attr.name)) {
+      } else if (is.loopDirective(attr.name)) {
         console.log('isLoopDirective', node)
-      } else if (this.isEventDirective(attr.name)) {
+      } else if (is.eventDirective(attr.name)) {
         console.log('isEventDirective', node)
-      } else if (this.isBindDirective(attr.name)) {
+      } else if (is.bindDirective(attr.name)) {
         const key = attr.name.substr(1)
         const val = attr.nodeValue
         console.log('isBindDirective', key, val, node)
       }
     }
-  }
-
-  isElementNode (node) {
-    return node.nodeType === 1
-  }
-
-  isTextNode (node) {
-    return node.nodeType === 3
-  }
-
-  isModelDirective (val) {
-    return val === 'model'
-  }
-
-  isLoopDirective (val) {
-    return val === 'loop'
-  }
-
-  isEventDirective (val) {
-    return val.indexOf('@') !== -1
-  }
-
-  isBindDirective (val) {
-    return val.startsWith(':')
   }
 }
 

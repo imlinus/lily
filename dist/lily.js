@@ -22,6 +22,24 @@ Watcher.prototype.get = function get () {
   return val
 };
 
+var config = {
+  silent: false,
+  symbols: {
+    bind: ':',
+    event: '@',
+    loop: 'loop',
+    model: 'model'
+  }
+};
+
+var elementNode = function (node) { return node.nodeType === 1; };
+var textNode = function (node) { return node.nodeType === 3; };
+
+var modelDirective = function (val) { return val === config.symbol.model; };
+var loopDirective = function (val) { return val === config.symbol.loop; };
+var eventDirective = function (val) { return val.indexOf(config.symbol.event) !== -1; };
+var bindDirective = function (val) { return val.startsWith(config.symbol.bind); };
+
 var Compile = function Compile (view, el) {
   this.view = view;
   this.el = el;
@@ -31,17 +49,16 @@ var Compile = function Compile (view, el) {
 
 Compile.prototype.init = function init () {
   this.run = this.view.__proto__;
-  // if (this.run.beforeMount) this.run.beforeMount()
+  if (this.run.beforeMount) { this.run.beforeMount(); }
 
   this.template = this.html(this.view.template);
   this.compileElement(this.template);
 
   if (this.el) {
-    console.log('el', this.el);
     this.el.appendChild(this.template);
   }
 
-  // if (this.run.mounted) this.run.mounted()
+  if (this.run.mounted) { this.run.mounted(); }
 };
 
 Compile.prototype.html = function html (html$1) {
@@ -59,9 +76,9 @@ Compile.prototype.compileElement = function compileElement (node) {
     var regx = /\{\{(.*)\}\}/;
     var text = child.textContent;
 
-    if (this.isElementNode(child)) {
+    if (elementNode(child)) {
       this.compile(child);
-    } else if (this.isTextNode(child) && regx.test(text)) {
+    } else if (textNode(child) && regx.test(text)) {
       this.compileText(child, regx.exec(text)[1].trim());
     }
 
@@ -79,37 +96,15 @@ Compile.prototype.compileText = function compileText (node, exp) {
     new Watcher(this.view, exp, function (newVal) {
       node.textContent = newVal ? newVal : '';
     });
-  } else if (this.view.props) {
-    var attrs = node.attributes;
-    console.log(this.view, node);
-
-    // for (let i = 0; i < attrs.length; i++) {
-    // const attr = attrs[i]
-
-    // if (this.isBindDirective(attr.name)) {
-    //   const key = attr.name.substr(1)
-    //   const val = attr.nodeValue
-    //   console.log('isBindDirective', key, val, node)
-    //   console.log(this.vm.props[exp])
-    // }
-    // }
   }
 };
 
 Compile.prototype.compile = function compile (node) {
-  var attrs = node.attributes;
-
-  // compile sub components
   if (this.view.components) {
     var component = this.view.components[node.localName];
 
     if (component) {
       var comp = new Compile(component, this.template);
-      var parent = node.parentNode;
-
-      // parent.removeChild(node) // remove component tag
-      // parent.appendChild(comp.template) // add component html
-
       this.checkAttrs(node);
     }
   } else {
@@ -124,14 +119,14 @@ Compile.prototype.checkAttrs = function checkAttrs (node) {
   for (var i = 0; i < attrs.length; i++) {
     var attr = attrs[i];
 
-    if (this.isModelDirective(attr.name)) {
+    if (modelDirective(attr.name)) {
       var tagName = node.tagName.toLowerCase();
       console.log('isModelDirective', tagName, node);
-    } else if (this.isLoopDirective(attr.name)) {
+    } else if (loopDirective(attr.name)) {
       console.log('isLoopDirective', node);
-    } else if (this.isEventDirective(attr.name)) {
+    } else if (eventDirective(attr.name)) {
       console.log('isEventDirective', node);
-    } else if (this.isBindDirective(attr.name)) {
+    } else if (bindDirective(attr.name)) {
       var key = attr.name.substr(1);
       var val = attr.nodeValue;
       console.log('isBindDirective', key, val, node);
@@ -139,41 +134,33 @@ Compile.prototype.checkAttrs = function checkAttrs (node) {
   }
 };
 
-Compile.prototype.isElementNode = function isElementNode (node) {
-  return node.nodeType === 1
+var welcome = function (obj) {
+  var title = '🌷 Lily.js';
+  var info = 'More info:';
+  var link = 'https://github.com/imlinus/lily';
+  var css = {
+    title: ['color: white', 'font-size: 1.5rem', 'font-weight: bold', 'padding: 0.675rem 0 0.475rem'].join(';'),
+    info: ['color: white', 'font-size: 0.75rem', 'padding: 0'].join(';'),
+    link: ['color: white', 'font-size: 0.75rem', 'padding: 0.25rem 0 0.675rem'].join(';')
+  };
+
+  if (!Lily$1.prototype.config.silent) {
+    console.log(("%c" + (title.trim()) + "\n%c" + (info.trim()) + "\n%c" + (link.trim()) + "\n"), css.title, css.info, css.link, obj);
+  }
 };
 
-Compile.prototype.isTextNode = function isTextNode (node) {
-  return node.nodeType === 3
-};
-
-Compile.prototype.isModelDirective = function isModelDirective (val) {
-  return val === 'model'
-};
-
-Compile.prototype.isLoopDirective = function isLoopDirective (val) {
-  return val === 'loop'
-};
-
-Compile.prototype.isEventDirective = function isEventDirective (val) {
-  return val.indexOf('@') !== -1
-};
-
-Compile.prototype.isBindDirective = function isBindDirective (val) {
-  return val.startsWith(':')
-};
-
-var Lily = function Lily (app, el) {
+var Lily$1 = function Lily (app, el) {
+  welcome(this);
   this.app = new app();
   this.el = (el instanceof HTMLElement ? el : el = document.body);
 
   this.defineReactive(this.app);
   new Compile(this.app, this.el);
 
-  console.log(this.app);
+  console.log(this);
 };
 
-Lily.prototype.defineReactive = function defineReactive (obj) {
+Lily$1.prototype.defineReactive = function defineReactive (obj) {
   for (var i$2 = 0, list$2 = Object.entries(obj); i$2 < list$2.length; i$2 += 1) {
     var ref = list$2[i$2];
       var key = ref[0];
@@ -195,7 +182,7 @@ Lily.prototype.defineReactive = function defineReactive (obj) {
   }
 };
 
-Lily.prototype.proxyData = function proxyData (obj, key) {
+Lily$1.prototype.proxyData = function proxyData (obj, key) {
   Object.defineProperty(obj, key, {
     configurable: true,
     enumerable: false,
@@ -208,12 +195,14 @@ Lily.prototype.proxyData = function proxyData (obj, key) {
   });
 };
 
-Lily.prototype.get = function get (key) {
+Lily$1.prototype.get = function get (key) {
   return this.app[key]
 };
 
-Lily.prototype.set = function set (key, val) {
+Lily$1.prototype.set = function set (key, val) {
   this.app[key] = val;
 };
 
-module.exports = Lily;
+Lily$1.prototype.config = config;
+
+module.exports = Lily$1;

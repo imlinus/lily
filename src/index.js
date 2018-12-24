@@ -1,14 +1,17 @@
 import Compile from './compile.js'
+import config from './config.js'
+import * as log from './utils/log/index.js'
 
 class Lily {
   constructor (app, el) {
+    log.welcome(this)
     this.app = new app()
     this.el = (el instanceof HTMLElement ? el : el = document.body)
 
     this.defineReactive(this.app)
     new Compile(this.app, this.el)
 
-    console.log(this.app)
+    console.log(this)
   }
 
   defineReactive (obj) {
@@ -46,5 +49,7 @@ class Lily {
     this.app[key] = val
   }
 }
+
+Lily.prototype.config = config
 
 export default Lily
