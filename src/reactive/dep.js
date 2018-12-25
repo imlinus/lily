@@ -1,19 +1,17 @@
 class Dep {
   constructor () {
-    this.deps = []
+    this.subs = []
   }
 
-  addWatcher (watcher) {
-    this.deps.push(watcher)
+  addSub (sub) {
+    this.subs.push(sub)
   }
 
   notify () {
-    this.deps.forEach(watcher => {
-      watcher.update()
-    })
+    for (let i = 0; i < this.subs.length; i++) {
+      this.subs[i].update()
+    }
   }
 }
-
-Dep.target = null
 
 export default Dep

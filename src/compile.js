@@ -1,26 +1,26 @@
 import Watcher from './reactive/watcher.js'
 import * as is from './utils/is.js'
+import config from './config.js'
 
 class Compile {
-  constructor (view, el) {
+  constructor (view) {
     this.view = view
-    this.el = el
-  
-    this.init()
-  }
+    const hooks = this.view.__proto__
 
-  init () {
-    this.run = this.view.__proto__
-    if (this.run.beforeMount) this.run.beforeMount()
+    if (hooks.beforeMount) hooks.beforeMount()
 
-    this.template = this.html(this.view.template)
-    this.compileElement(this.template)
-
-    if (this.el) {
-      this.el.appendChild(this.template)
+    if (this.view.components) {
+      this.components = this.view.components()
     }
 
-    if (this.run.mounted) this.run.mounted()
+    if (this.view.template) {
+      this.template = this.html(this.view.template())
+    }
+
+    this.walkNodes(this.template)
+    this.nodes(this.template)
+
+    if (hooks.mounted) hooks.mounted()
   }
 
   html (html) {
@@ -30,7 +30,27 @@ class Compile {
     return template.content.firstChild
   }
 
-  compileElement (node) {
+  nodes (el) {
+    const nodes = el.querySelectorAll('*')
+
+    for (let i = 0; i < nodes.length; i++) {
+      this.bindMethods(nodes[i].attributes)
+    }
+  }
+
+  bindMethods (nodes) {
+    return Object.values(nodes).reduce((n, attr) => {
+      const method = attr.nodeName
+      const val = attr.nodeValue
+      const el = attr.ownerElement
+
+      if (new RegExp(config.symbols.model).test(method)) return this.model(el, val, method)
+      if (new RegExp(config.symbols.event).test(method)) return this.on(el, val, method)
+      if (new RegExp(config.symbols.loop).test(method)) return this.for(el, val, method)
+    }, [])
+  }
+
+  walkNodes (node) {
     const childs = node.childNodes
 
     for (let i = 0; i < childs.length; i++) {
@@ -39,13 +59,13 @@ class Compile {
       const text = child.textContent
 
       if (is.elementNode(child)) {
-        this.compile(child)
+        // do nothing for now
       } else if (is.textNode(child) && regx.test(text)) {
         this.compileText(child, regx.exec(text)[1].trim())
       }
 
       if (child.childNodes && child.childNodes.length !== 0) {
-        this.compileElement(child)
+        this.walkNodes(child)
       }
     }
   }
@@ -61,39 +81,25 @@ class Compile {
     }
   }
 
-  compile (node) {
-    if (this.view.components) {
-      const component = this.view.components[node.localName]
-
-      if (component) {
-        const comp = new Compile(component, this.template)
-        this.checkAttrs(node)
-      }
-    } else {
-      this.checkAttrs(node)
-    }
+  on (el, key, method) {
+    const evt = method.substr(1)
+    el.addEventListener(evt, () => this.view[key](event))
   }
 
-  checkAttrs (node) {
-    const attrs = node.attributes
+  for (el, val, method) {
+    console.log('loop', el, val, method)
+  }
 
-    // check attributes
-    for (let i = 0; i < attrs.length; i++) {
-      const attr = attrs[i]
+  model (el, key, method) {
+    el.addEventListener('input', () => {
+      this.view.data[key] = el.value
+    })
 
-      if (is.modelDirective(attr.name)) {
-        let tagName = node.tagName.toLowerCase()
-        console.log('isModelDirective', tagName, node)
-      } else if (is.loopDirective(attr.name)) {
-        console.log('isLoopDirective', node)
-      } else if (is.eventDirective(attr.name)) {
-        console.log('isEventDirective', node)
-      } else if (is.bindDirective(attr.name)) {
-        const key = attr.name.substr(1)
-        const val = attr.nodeValue
-        console.log('isBindDirective', key, val, node)
-      }
-    }
+    new Watcher(this.view, method, newVal => {
+      el.value = newVal
+    })
+
+    return el.value = this.view.data[key]
   }
 }
 

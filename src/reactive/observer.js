@@ -3,28 +3,31 @@ import Dep from './dep.js'
 const observe = data => {
   if (!data || typeof data !== 'object') return
 
-  Object.keys(data).forEach(key => {
-    defineObserver(data, key, data[key])
-  })
+  const keys = Object.keys(data)
+
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i]
+    defineReactive(data, key, data[key])
+  }
 }
 
-const defineObserver = (data, key, val) => {
+const defineReactive = (target, key, val) => {
+  const dep = new Dep()
   observe(val)
-  let dep = new Dep()
 
-  Object.defineProperty(data, key, {
-    enumerable: true,
+  Object.defineProperty(target, key, {
     configurable: false,
+    enumerable: true,
     get () {
-      if (Dep.target) dep.addWatcher(Dep.target)
-
+      Dep.target && dep.addSub(Dep.target)
       return val
     },
-
     set (newVal) {
-      if (val === newVal) return
+      if (newVal === val) return
       val = newVal
       dep.notify()
     }
   })
 }
+
+export default observe

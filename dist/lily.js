@@ -1,25 +1,43 @@
 'use strict';
 
-var Watcher = function Watcher (vm, exp, cb) {
-  this.vm = vm;
-  this.exp = exp;
+var Dep = function Dep () {
+  this.subs = [];
+};
+
+Dep.prototype.addSub = function addSub (sub) {
+  this.subs.push(sub);
+};
+
+Dep.prototype.notify = function notify () {
+  for (var i = 0; i < this.subs.length; i++) {
+    this.subs[i].update();
+  }
+};
+
+var Watcher = function Watcher (view, expr, cb) {
+  this.view = view;
+  this.expr = expr;
   this.cb = cb;
+
+  Dep.target = this;
   this.val = this.get();
 };
 
-Watcher.prototype.update = function update () {
-  var oldVal = this.val;
-  var newVal = this.vm.data[this.exp];
-  if (oldVal === newVal) { return }
-
-  this.val = newVal;
-  this.cb.call(this.vm, newVal);
-};
-
 Watcher.prototype.get = function get () {
-  var val = this.vm.data[this.exp];
+  var val = this.view[this.expr];
+  Dep.target = null;
 
   return val
+};
+
+Watcher.prototype.update = function update () {
+  var newVal = this.get();
+  var oldVal = this.val;
+
+  if (newVal === oldVal) { return }
+
+  this.val = newVal;
+  this.cb.call(this.vm, newVal, oldVal);
 };
 
 var config = {
@@ -28,37 +46,31 @@ var config = {
     bind: ':',
     event: '@',
     loop: 'loop',
-    model: 'model'
+    model: 'bind'
   }
 };
 
 var elementNode = function (node) { return node.nodeType === 1; };
 var textNode = function (node) { return node.nodeType === 3; };
 
-var modelDirective = function (val) { return val === config.symbol.model; };
-var loopDirective = function (val) { return val === config.symbol.loop; };
-var eventDirective = function (val) { return val.indexOf(config.symbol.event) !== -1; };
-var bindDirective = function (val) { return val.startsWith(config.symbol.bind); };
-
-var Compile = function Compile (view, el) {
+var Compile = function Compile (view) {
   this.view = view;
-  this.el = el;
-  
-  this.init();
-};
+  var hooks = this.view.__proto__;
 
-Compile.prototype.init = function init () {
-  this.run = this.view.__proto__;
-  if (this.run.beforeMount) { this.run.beforeMount(); }
+  if (hooks.beforeMount) { hooks.beforeMount(); }
 
-  this.template = this.html(this.view.template);
-  this.compileElement(this.template);
-
-  if (this.el) {
-    this.el.appendChild(this.template);
+  if (this.view.components) {
+    this.components = this.view.components();
   }
 
-  if (this.run.mounted) { this.run.mounted(); }
+  if (this.view.template) {
+    this.template = this.html(this.view.template());
+  }
+
+  this.walkNodes(this.template);
+  this.nodes(this.template);
+
+  if (hooks.mounted) { hooks.mounted(); }
 };
 
 Compile.prototype.html = function html (html$1) {
@@ -68,7 +80,29 @@ Compile.prototype.html = function html (html$1) {
   return template.content.firstChild
 };
 
-Compile.prototype.compileElement = function compileElement (node) {
+Compile.prototype.nodes = function nodes (el) {
+  var nodes = el.querySelectorAll('*');
+
+  for (var i = 0; i < nodes.length; i++) {
+    this.bindMethods(nodes[i].attributes);
+  }
+};
+
+Compile.prototype.bindMethods = function bindMethods (nodes) {
+    var this$1 = this;
+
+  return Object.values(nodes).reduce(function (n, attr) {
+    var method = attr.nodeName;
+    var val = attr.nodeValue;
+    var el = attr.ownerElement;
+
+    if (new RegExp(config.symbols.model).test(method)) { return this$1.model(el, val, method) }
+    if (new RegExp(config.symbols.event).test(method)) { return this$1.on(el, val, method) }
+    if (new RegExp(config.symbols.loop).test(method)) { return this$1.for(el, val, method) }
+  }, [])
+};
+
+Compile.prototype.walkNodes = function walkNodes (node) {
   var childs = node.childNodes;
 
   for (var i = 0; i < childs.length; i++) {
@@ -76,14 +110,12 @@ Compile.prototype.compileElement = function compileElement (node) {
     var regx = /\{\{(.*)\}\}/;
     var text = child.textContent;
 
-    if (elementNode(child)) {
-      this.compile(child);
-    } else if (textNode(child) && regx.test(text)) {
+    if (elementNode(child)) ; else if (textNode(child) && regx.test(text)) {
       this.compileText(child, regx.exec(text)[1].trim());
     }
 
     if (child.childNodes && child.childNodes.length !== 0) {
-      this.compileElement(child);
+      this.walkNodes(child);
     }
   }
 };
@@ -99,110 +131,112 @@ Compile.prototype.compileText = function compileText (node, exp) {
   }
 };
 
-Compile.prototype.compile = function compile (node) {
-  if (this.view.components) {
-    var component = this.view.components[node.localName];
+Compile.prototype.on = function on (el, key, method) {
+    var this$1 = this;
 
-    if (component) {
-      var comp = new Compile(component, this.template);
-      this.checkAttrs(node);
-    }
-  } else {
-    this.checkAttrs(node);
+  var evt = method.substr(1);
+  el.addEventListener(evt, function () { return this$1.view[key](event); });
+};
+
+Compile.prototype.for = function for$1 (el, val, method) {
+  console.log('loop', el, val, method);
+};
+
+Compile.prototype.model = function model (el, key, method) {
+    var this$1 = this;
+
+  el.addEventListener('input', function () {
+    this$1.view.data[key] = el.value;
+  });
+
+  new Watcher(this.view, method, function (newVal) {
+    el.value = newVal;
+  });
+
+  return el.value = this.view.data[key]
+};
+
+var observe = function (data) {
+  if (!data || typeof data !== 'object') { return }
+
+  var keys = Object.keys(data);
+
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    defineReactive(data, key, data[key]);
   }
 };
 
-Compile.prototype.checkAttrs = function checkAttrs (node) {
-  var attrs = node.attributes;
+var defineReactive = function (target, key, val) {
+  var dep = new Dep();
+  observe(val);
 
-  // check attributes
-  for (var i = 0; i < attrs.length; i++) {
-    var attr = attrs[i];
-
-    if (modelDirective(attr.name)) {
-      var tagName = node.tagName.toLowerCase();
-      console.log('isModelDirective', tagName, node);
-    } else if (loopDirective(attr.name)) {
-      console.log('isLoopDirective', node);
-    } else if (eventDirective(attr.name)) {
-      console.log('isEventDirective', node);
-    } else if (bindDirective(attr.name)) {
-      var key = attr.name.substr(1);
-      var val = attr.nodeValue;
-      console.log('isBindDirective', key, val, node);
-    }
-  }
-};
-
-var welcome = function (obj) {
-  var title = '🌷 Lily.js';
-  var info = 'More info:';
-  var link = 'https://github.com/imlinus/lily';
-  var css = {
-    title: ['color: white', 'font-size: 1.5rem', 'font-weight: bold', 'padding: 0.675rem 0 0.475rem'].join(';'),
-    info: ['color: white', 'font-size: 0.75rem', 'padding: 0'].join(';'),
-    link: ['color: white', 'font-size: 0.75rem', 'padding: 0.25rem 0 0.675rem'].join(';')
-  };
-
-  if (!Lily$1.prototype.config.silent) {
-    console.log(("%c" + (title.trim()) + "\n%c" + (info.trim()) + "\n%c" + (link.trim()) + "\n"), css.title, css.info, css.link, obj);
-  }
-};
-
-var Lily$1 = function Lily (app, el) {
-  welcome(this);
-  this.app = new app();
-  this.el = (el instanceof HTMLElement ? el : el = document.body);
-
-  this.defineReactive(this.app);
-  new Compile(this.app, this.el);
-
-  console.log(this);
-};
-
-Lily$1.prototype.defineReactive = function defineReactive (obj) {
-  for (var i$2 = 0, list$2 = Object.entries(obj); i$2 < list$2.length; i$2 += 1) {
-    var ref = list$2[i$2];
-      var key = ref[0];
-      var val = ref[1];
-
-      if (key === 'data') {
-      for (var i = 0, list = Object.keys(val); i < list.length; i += 1) {
-        var data = list[i];
-
-          this.proxyData(obj, data);
-      }
-    } else if (key === 'components') {
-      for (var i$1 = 0, list$1 = Object.entries(val); i$1 < list$1.length; i$1 += 1) {
-        var component = list$1[i$1];
-
-          this.defineReactive(component[1]);
-      }
-    }
-  }
-};
-
-Lily$1.prototype.proxyData = function proxyData (obj, key) {
-  Object.defineProperty(obj, key, {
-    configurable: true,
-    enumerable: false,
+  Object.defineProperty(target, key, {
+    configurable: false,
+    enumerable: true,
     get: function get () {
-      return obj.data[key]
+      Dep.target && dep.addSub(Dep.target);
+      return val
     },
-    set: function set (val) {
-      obj.data[key] = val;
+    set: function set (newVal) {
+      if (newVal === val) { return }
+      val = newVal;
+      dep.notify();
     }
   });
 };
 
-Lily$1.prototype.get = function get (key) {
-  return this.app[key]
+var html = function (html) {
+  var tmp = document.createElement('template');
+  tmp.innerHTML = html.trim();
+
+  return tmp.content.firstChild
 };
 
-Lily$1.prototype.set = function set (key, val) {
-  this.app[key] = val;
+var Lily = function Lily (el) {
+  this.el = (el && html(el) instanceof HTMLElement ? el = html(el) : el = document.body);
+  if (this.data) { this.data = this.data(); }
+  this.defineReactive();
+  observe(this.data);
+  this.template = new Compile(this).template;
+  this.render();
 };
 
-Lily$1.prototype.config = config;
+Lily.prototype.render = function render () {
+  this.el.appendChild(this.template);
+};
 
-module.exports = Lily$1;
+Lily.prototype.get = function get (key) {
+  return this.data[key]
+};
+
+Lily.prototype.set = function set (key, val) {
+  this.data[key] = val;
+};
+
+Lily.prototype.defineReactive = function defineReactive () {
+    var this$1 = this;
+
+  var keys = Object.keys(this.data);
+
+  var loop = function ( i ) {
+    var key = keys[i];
+
+    Object.defineProperty(this$1, key, {
+      configurable: false,
+      enumerable: true,
+      get: function get () {
+        return this.data[key]
+      },
+      set: function set (val) {
+        this.data[key] = val;
+      }
+    });
+  };
+
+    for (var i = 0; i < keys.length; i++) loop( i );
+};
+
+Lily.prototype.config = config;
+
+module.exports = Lily;

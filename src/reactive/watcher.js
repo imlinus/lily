@@ -1,28 +1,30 @@
 import Dep from './dep.js'
 
 class Watcher {
-  constructor (vm, exp, cb) {
-    this.vm = vm
-    this.exp = exp
+  constructor (view, expr, cb) {
+    this.view = view
+    this.expr = expr
     this.cb = cb
+
+    Dep.target = this
     this.val = this.get()
   }
 
-  update () {
-    let oldVal = this.val
-    let newVal = this.vm.data[this.exp]
-    if (oldVal === newVal) return
-
-    this.val = newVal
-    this.cb.call(this.vm, newVal)
-  }
-
   get () {
-    Dep.target = this
-    let val = this.vm.data[this.exp]
+    const val = this.view[this.expr]
     Dep.target = null
 
     return val
+  }
+
+  update () {
+    const newVal = this.get()
+    const oldVal = this.val
+
+    if (newVal === oldVal) return
+
+    this.val = newVal
+    this.cb.call(this.vm, newVal, oldVal)
   }
 }
 

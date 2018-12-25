@@ -4,7 +4,7 @@ const config = {
     bind: ':',
     event: '@',
     loop: 'loop',
-    model: 'model'
+    model: 'bind'
   }
 }
 
