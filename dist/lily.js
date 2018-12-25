@@ -130,7 +130,21 @@ Compile.prototype.on = function on (el, key, method) {
 };
 
 Compile.prototype.loop = function loop (el, key, method) {
-  console.log('loop', el, key, method, this.view.data[key]);
+  var itemName = key.split('in')[0].replace(/\s/g, '');
+  var arrName = key.split('in')[1].replace(/\s/g, '');
+  var arr = this.view.data[arrName];
+  var parent = el.parentNode;
+  var elType = el.localName;
+
+  parent.removeChild(el);
+
+  for (var i = 0; i < arr.length; i++) {
+    var item = arr[i];
+    var newEl = document.createElement(elType);
+
+    newEl.textContent = item;
+    parent.appendChild(newEl);
+  }
 };
 
 Compile.prototype.bind = function bind (el, key, method) {

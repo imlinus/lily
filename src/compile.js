@@ -87,7 +87,21 @@ class Compile {
   }
 
   loop (el, key, method) {
-    console.log('loop', el, key, method, this.view.data[key])
+    const itemName = key.split('in')[0].replace(/\s/g, '')
+    const arrName = key.split('in')[1].replace(/\s/g, '')
+    const arr = this.view.data[arrName]
+    const parent = el.parentNode
+    const elType = el.localName
+
+    parent.removeChild(el)
+
+    for (let i = 0; i < arr.length; i++) {
+      const item = arr[i]
+      const newEl = document.createElement(elType)
+
+      newEl.textContent = item
+      parent.appendChild(newEl)
+    }
   }
 
   bind (el, key, method) {
