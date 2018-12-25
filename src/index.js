@@ -13,13 +13,9 @@ class Lily {
   }
 
   render () {
-    // if (this.el.localName === 'body') {
-      this.el.appendChild(this.template)
-    // } else {
-    //   const parent = this.el.parentNode
-    //   parent.removeChild(this.el)
-    //   parent.appendChild(this.template)
-    // }
+    this.el.localName === 'body'
+      ? this.el.appendChild(this.template)
+      : this.el.parentNode.replaceChild(this.template, this.el)
   }
 
   get (key) {

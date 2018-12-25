@@ -214,7 +214,9 @@ var Lily = function Lily (el) {
 };
 
 Lily.prototype.render = function render () {
-  this.el.appendChild(this.template);
+  this.el.localName === 'body'
+    ? this.el.appendChild(this.template)
+    : this.el.parentNode.replaceChild(this.template, this.el);
 };
 
 Lily.prototype.get = function get (key) {

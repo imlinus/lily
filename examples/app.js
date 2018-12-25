@@ -21,12 +21,12 @@ class App extends Lily {
   template () {
     return /* html */`
       <div class="app">
-        <hello-world />
+        <hello-world></hello-world>
         <h2>{{ title }}</h2>
         <input type="text" bind="title" />
 
-        <counter />
-        <list />
+        <counter></counter>
+        <list></list>
       </div>
     `
   }
