@@ -13,7 +13,13 @@ class Lily {
   }
 
   render () {
-    this.el.appendChild(this.template)
+    // if (this.el.localName === 'body') {
+      this.el.appendChild(this.template)
+    // } else {
+    //   const parent = this.el.parentNode
+    //   parent.removeChild(this.el)
+    //   parent.appendChild(this.template)
+    // }
   }
 
   get (key) {

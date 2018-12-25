@@ -16,4 +16,5 @@ class HelloWorld extends Lily {
   }
 }
 
-const helloWorld = new HelloWorld()
+// const helloWorld = new HelloWorld()
+export default HelloWorld
