@@ -1,5 +1,6 @@
 import Watcher from './reactive/watcher.js'
 import * as is from './utils/is.js'
+import html from './utils/html.js'
 
 class Compile {
   constructor (view) {
@@ -13,20 +14,15 @@ class Compile {
     }
 
     if (this.view.template) {
-      this.template = this.html(this.view.template())
+      this.template = html(this.view.template())
     }
 
     this.walkNodes(this.template)
     this.nodes(this.template)
 
     if (hooks.mounted) hooks.mounted()
-  }
 
-  html (html) {
-    const template = document.createElement('template')
-    template.innerHTML = html.trim()
-
-    return template.content.firstChild
+    // console.log(this)
   }
 
   nodes (el) {
@@ -51,6 +47,8 @@ class Compile {
   }
 
   walkNodes (node) {
+    if (!node) return
+
     const childs = node.childNodes
 
     for (let i = 0; i < childs.length; i++) {
@@ -59,7 +57,10 @@ class Compile {
       const text = child.textContent
 
       if (is.elementNode(child)) {
-        // do nothing for now
+        if (this.components && this.components.hasOwnProperty(child.localName)) {
+          const Component = this.components[child.localName]
+          new Component(child)
+        }
       } else if (is.textNode(child) && regx.test(text)) {
         this.compileText(child, regx.exec(text)[1].trim())
       }

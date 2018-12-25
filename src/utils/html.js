@@ -1,8 +1,12 @@
 const html = html => {
-  const tmp = document.createElement('template')
-  tmp.innerHTML = html.trim()
+  if (!html) return
 
-  return tmp.content.firstChild
+  const el = document.createElement('html')
+  // const tmp = document.createElement('template')
+  el.innerHTML = html.trim()
+
+  return el.children[1].firstChild
+  // return el.firstChild
 }
 
 export default html

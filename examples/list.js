@@ -16,4 +16,5 @@ class List extends Lily {
   }
 }
 
-const list = new List()
+// const list = new List()
+export default List

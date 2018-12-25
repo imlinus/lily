@@ -4,7 +4,7 @@ import html from './utils/html.js'
 
 class Lily {
   constructor (el) {
-    this.el = (el && html(el) instanceof HTMLElement ? el = html(el) : el = document.body)
+    this.el = (el && el instanceof HTMLElement ? el : el = document.body)
     if (this.data) this.data = this.data()
     this.reactive()
     observe(this.data)

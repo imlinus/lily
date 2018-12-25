@@ -21,4 +21,5 @@ class Counter extends Lily {
   }
 }
 
-const counter = new Counter()
+// const counter = new Counter()
+export default Counter

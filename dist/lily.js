@@ -43,6 +43,17 @@ Watcher.prototype.update = function update () {
 var elementNode = function (node) { return node.nodeType === 1; };
 var textNode = function (node) { return node.nodeType === 3; };
 
+var html = function (html) {
+  if (!html) { return }
+
+  var el = document.createElement('html');
+  // const tmp = document.createElement('template')
+  el.innerHTML = html.trim();
+
+  return el.children[1].firstChild
+  // return el.firstChild
+};
+
 var Compile = function Compile (view) {
   this.view = view;
   var hooks = this.view.__proto__;
@@ -54,20 +65,15 @@ var Compile = function Compile (view) {
   }
 
   if (this.view.template) {
-    this.template = this.html(this.view.template());
+    this.template = html(this.view.template());
   }
 
   this.walkNodes(this.template);
   this.nodes(this.template);
 
   if (hooks.mounted) { hooks.mounted(); }
-};
 
-Compile.prototype.html = function html (html$1) {
-  var template = document.createElement('template');
-  template.innerHTML = html$1.trim();
-
-  return template.content.firstChild
+  // console.log(this)
 };
 
 Compile.prototype.nodes = function nodes (el) {
@@ -94,6 +100,8 @@ Compile.prototype.bindMethods = function bindMethods (nodes) {
 };
 
 Compile.prototype.walkNodes = function walkNodes (node) {
+  if (!node) { return }
+
   var childs = node.childNodes;
 
   for (var i = 0; i < childs.length; i++) {
@@ -101,7 +109,12 @@ Compile.prototype.walkNodes = function walkNodes (node) {
     var regx = /\{\{(.*)\}\}/;
     var text = child.textContent;
 
-    if (elementNode(child)) ; else if (textNode(child) && regx.test(text)) {
+    if (elementNode(child)) {
+      if (this.components && this.components.hasOwnProperty(child.localName)) {
+        var Component = this.components[child.localName];
+        new Component(child);
+      }
+    } else if (textNode(child) && regx.test(text)) {
       this.compileText(child, regx.exec(text)[1].trim());
     }
 
@@ -191,15 +204,8 @@ var defineReactive = function (target, key, val) {
   });
 };
 
-var html = function (html) {
-  var tmp = document.createElement('template');
-  tmp.innerHTML = html.trim();
-
-  return tmp.content.firstChild
-};
-
 var Lily = function Lily (el) {
-  this.el = (el && html(el) instanceof HTMLElement ? el = html(el) : el = document.body);
+  this.el = (el && el instanceof HTMLElement ? el : el = document.body);
   if (this.data) { this.data = this.data(); }
   this.reactive();
   observe(this.data);
