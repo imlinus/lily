@@ -8,7 +8,7 @@ class HelloWorld extends Lily {
   }
 
   template () {
-    return html`
+    return /* html */`
       <div class="hello-world">
         <h2>{{ title }}</h2>
       </div>
@@ -16,4 +16,4 @@ class HelloWorld extends Lily {
   }
 }
 
-export default HelloWorld
+const helloWorld = new HelloWorld()
