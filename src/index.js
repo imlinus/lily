@@ -1,13 +1,12 @@
 import Compile from './compile.js'
 import observe from './reactive/observer.js'
-import config from './config.js'
 import html from './utils/html.js'
 
 class Lily {
   constructor (el) {
     this.el = (el && html(el) instanceof HTMLElement ? el = html(el) : el = document.body)
     if (this.data) this.data = this.data()
-    this.defineReactive()
+    this.reactive()
     observe(this.data)
     this.template = new Compile(this).template
     this.render()
@@ -25,7 +24,7 @@ class Lily {
     this.data[key] = val
   }
 
-  defineReactive () {
+  reactive () {
     const keys = Object.keys(this.data)
 
     for (let i = 0; i < keys.length; i++) {
@@ -45,6 +44,8 @@ class Lily {
   }
 }
 
-Lily.prototype.config = config
+Lily.prototype.config = {
+  silent: false
+}
 
 export default Lily

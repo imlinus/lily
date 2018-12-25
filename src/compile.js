@@ -1,6 +1,5 @@
 import Watcher from './reactive/watcher.js'
 import * as is from './utils/is.js'
-import config from './config.js'
 
 class Compile {
   constructor (view) {
@@ -41,12 +40,13 @@ class Compile {
   bindMethods (nodes) {
     return Object.values(nodes).reduce((n, attr) => {
       const method = attr.nodeName
-      const val = attr.nodeValue
+      const key = attr.nodeValue
       const el = attr.ownerElement
 
-      if (new RegExp(config.symbols.model).test(method)) return this.model(el, val, method)
-      if (new RegExp(config.symbols.event).test(method)) return this.on(el, val, method)
-      if (new RegExp(config.symbols.loop).test(method)) return this.for(el, val, method)
+      // https://koukia.ca/top-6-ways-to-search-for-a-string-in-javascript-and-performance-benchmarks-ce3e9b81ad31
+      if (/bind/.test(method)) return this.bind(el, key, method)
+      if (/@/.test(method)) return this.on(el, key, method)
+      if (/loop/.test(method)) return this.loop(el, key, method)
     }, [])
   }
 
@@ -75,8 +75,8 @@ class Compile {
       const text = this.view.data[exp]
       node.textContent = text
 
-      new Watcher(this.view, exp, newVal => {
-        node.textContent = newVal ? newVal : ''
+      new Watcher(this.view, exp, val => {
+        node.textContent = val ? val : ''
       })
     }
   }
@@ -86,17 +86,17 @@ class Compile {
     el.addEventListener(evt, () => this.view[key](event))
   }
 
-  for (el, val, method) {
-    console.log('loop', el, val, method)
+  loop (el, key, method) {
+    console.log('loop', el, key, method, this.view.data[key])
   }
 
-  model (el, key, method) {
+  bind (el, key, method) {
     el.addEventListener('input', () => {
       this.view.data[key] = el.value
     })
 
-    new Watcher(this.view, method, newVal => {
-      el.value = newVal
+    new Watcher(this.view, method, val => {
+      el.value = val
     })
 
     return el.value = this.view.data[key]

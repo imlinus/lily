@@ -14,9 +14,9 @@ Dep.prototype.notify = function notify () {
   }
 };
 
-var Watcher = function Watcher (view, expr, cb) {
+var Watcher = function Watcher (view, exp, cb) {
   this.view = view;
-  this.expr = expr;
+  this.exp = exp;
   this.cb = cb;
 
   Dep.target = this;
@@ -24,7 +24,7 @@ var Watcher = function Watcher (view, expr, cb) {
 };
 
 Watcher.prototype.get = function get () {
-  var val = this.view[this.expr];
+  var val = this.view[this.exp];
   Dep.target = null;
 
   return val
@@ -38,16 +38,6 @@ Watcher.prototype.update = function update () {
 
   this.val = newVal;
   this.cb.call(this.vm, newVal, oldVal);
-};
-
-var config = {
-  silent: false,
-  symbols: {
-    bind: ':',
-    event: '@',
-    loop: 'loop',
-    model: 'bind'
-  }
 };
 
 var elementNode = function (node) { return node.nodeType === 1; };
@@ -93,12 +83,13 @@ Compile.prototype.bindMethods = function bindMethods (nodes) {
 
   return Object.values(nodes).reduce(function (n, attr) {
     var method = attr.nodeName;
-    var val = attr.nodeValue;
+    var key = attr.nodeValue;
     var el = attr.ownerElement;
 
-    if (new RegExp(config.symbols.model).test(method)) { return this$1.model(el, val, method) }
-    if (new RegExp(config.symbols.event).test(method)) { return this$1.on(el, val, method) }
-    if (new RegExp(config.symbols.loop).test(method)) { return this$1.for(el, val, method) }
+    // https://koukia.ca/top-6-ways-to-search-for-a-string-in-javascript-and-performance-benchmarks-ce3e9b81ad31
+    if (/bind/.test(method)) { return this$1.bind(el, key, method) }
+    if (/@/.test(method)) { return this$1.on(el, key, method) }
+    if (/loop/.test(method)) { return this$1.loop(el, key, method) }
   }, [])
 };
 
@@ -125,8 +116,8 @@ Compile.prototype.compileText = function compileText (node, exp) {
     var text = this.view.data[exp];
     node.textContent = text;
 
-    new Watcher(this.view, exp, function (newVal) {
-      node.textContent = newVal ? newVal : '';
+    new Watcher(this.view, exp, function (val) {
+      node.textContent = val ? val : '';
     });
   }
 };
@@ -138,19 +129,19 @@ Compile.prototype.on = function on (el, key, method) {
   el.addEventListener(evt, function () { return this$1.view[key](event); });
 };
 
-Compile.prototype.for = function for$1 (el, val, method) {
-  console.log('loop', el, val, method);
+Compile.prototype.loop = function loop (el, key, method) {
+  console.log('loop', el, key, method, this.view.data[key]);
 };
 
-Compile.prototype.model = function model (el, key, method) {
+Compile.prototype.bind = function bind (el, key, method) {
     var this$1 = this;
 
   el.addEventListener('input', function () {
     this$1.view.data[key] = el.value;
   });
 
-  new Watcher(this.view, method, function (newVal) {
-    el.value = newVal;
+  new Watcher(this.view, method, function (val) {
+    el.value = val;
   });
 
   return el.value = this.view.data[key]
@@ -196,7 +187,7 @@ var html = function (html) {
 var Lily = function Lily (el) {
   this.el = (el && html(el) instanceof HTMLElement ? el = html(el) : el = document.body);
   if (this.data) { this.data = this.data(); }
-  this.defineReactive();
+  this.reactive();
   observe(this.data);
   this.template = new Compile(this).template;
   this.render();
@@ -214,7 +205,7 @@ Lily.prototype.set = function set (key, val) {
   this.data[key] = val;
 };
 
-Lily.prototype.defineReactive = function defineReactive () {
+Lily.prototype.reactive = function reactive () {
     var this$1 = this;
 
   var keys = Object.keys(this.data);
@@ -237,6 +228,8 @@ Lily.prototype.defineReactive = function defineReactive () {
     for (var i = 0; i < keys.length; i++) loop( i );
 };
 
-Lily.prototype.config = config;
+Lily.prototype.config = {
+  silent: false
+};
 
 module.exports = Lily;

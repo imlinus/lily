@@ -1,6 +1,6 @@
 {
-  "name": "lily",
-  "version": "1.0.0",
+  "name": "lilyjs",
+  "version": "0.0.1",
   "description": "",
   "main": "dist/lily.js",
   "min": "dist/lily.min.js",
