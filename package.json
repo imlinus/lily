@@ -1,20 +1,7 @@
 {
-  "name": "lilyjs",
+  "name": "lily",
   "version": "0.0.1",
   "description": "",
-  "main": "dist/lily.js",
-  "min": "dist/lily.min.js",
-  "scripts": {
-    "start": "npm run dev",
-    "build": "rollup -c",
-    "dev": "rollup -c -w"
-  },
-  "devDependencies": {
-    "rollup": "^0.68.2",
-    "rollup-plugin-buble": "^0.19.6",
-    "rollup-plugin-serve": "^0.6.1",
-    "rollup-plugin-uglify-es": "0.0.1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/imlinus/lily.git"
