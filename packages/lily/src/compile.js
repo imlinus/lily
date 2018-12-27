@@ -39,7 +39,6 @@ class Compile {
       const key = attr.nodeValue
       const el = attr.ownerElement
 
-      // https://koukia.ca/top-6-ways-to-search-for-a-string-in-javascript-and-performance-benchmarks-ce3e9b81ad31
       if (/bind/.test(method)) return this.bind(el, key, method)
       if (/@/.test(method)) return this.on(el, key, method)
       if (/loop/.test(method)) return this.loop(el, key, method)
@@ -84,7 +83,10 @@ class Compile {
 
   on (el, key, method) {
     const evt = method.substr(1)
-    el.addEventListener(evt, () => this.view[key](event))
+
+    el.addEventListener(evt, () => {
+      if (this.view[key]) this.view[key](event)
+    })
   }
 
   loop (el, key, method) {
@@ -92,16 +94,15 @@ class Compile {
     const arrName = key.split('in')[1].replace(/\s/g, '')
     const arr = this.view.data[arrName]
     const parent = el.parentNode
-    const elType = el.localName
 
     parent.removeChild(el)
 
     for (let i = 0; i < arr.length; i++) {
       const item = arr[i]
-      const newEl = document.createElement(elType)
+      const $el = document.createElement(el.localName)
 
-      newEl.textContent = item
-      parent.appendChild(newEl)
+      $el.textContent = item
+      parent.appendChild($el)
     }
   }
 

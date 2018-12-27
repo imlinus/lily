@@ -14,7 +14,7 @@ class App extends Lily {
 
   data () {
     return {
-      title: '🌷 Lily.js',
+      title: '🌷 Lily.js'
     }
   }
 
@@ -22,6 +22,7 @@ class App extends Lily {
     return /* html */`
       <div class="app">
         <helloworld></helloworld>
+
         <h2>{{ title }}</h2>
         <input type="text" bind="title" />
 
@@ -32,4 +33,5 @@ class App extends Lily {
   }
 }
 
-const app = new App()
+// const app = new App()
+Lily.mount(App)

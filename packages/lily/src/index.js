@@ -10,6 +10,7 @@ class Lily {
     observe(this.data)
     this.template = new Compile(this).template
     this.render()
+    console.log(this)
   }
 
   render () {
@@ -43,6 +44,10 @@ class Lily {
         }
       })
     }
+  }
+
+  static mount (component) {
+    return new component()
   }
 }
 

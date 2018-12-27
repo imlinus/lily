@@ -92,7 +92,6 @@ Compile.prototype.bindMethods = function bindMethods (nodes) {
     var key = attr.nodeValue;
     var el = attr.ownerElement;
 
-    // https://koukia.ca/top-6-ways-to-search-for-a-string-in-javascript-and-performance-benchmarks-ce3e9b81ad31
     if (/bind/.test(method)) { return this$1.bind(el, key, method) }
     if (/@/.test(method)) { return this$1.on(el, key, method) }
     if (/loop/.test(method)) { return this$1.loop(el, key, method) }
@@ -139,7 +138,10 @@ Compile.prototype.on = function on (el, key, method) {
     var this$1 = this;
 
   var evt = method.substr(1);
-  el.addEventListener(evt, function () { return this$1.view[key](event); });
+
+  el.addEventListener(evt, function () {
+    if (this$1.view[key]) { this$1.view[key](event); }
+  });
 };
 
 Compile.prototype.loop = function loop (el, key, method) {
@@ -147,16 +149,15 @@ Compile.prototype.loop = function loop (el, key, method) {
   var arrName = key.split('in')[1].replace(/\s/g, '');
   var arr = this.view.data[arrName];
   var parent = el.parentNode;
-  var elType = el.localName;
 
   parent.removeChild(el);
 
   for (var i = 0; i < arr.length; i++) {
     var item = arr[i];
-    var newEl = document.createElement(elType);
+    var $el = document.createElement(el.localName);
 
-    newEl.textContent = item;
-    parent.appendChild(newEl);
+    $el.textContent = item;
+    parent.appendChild($el);
   }
 };
 
@@ -211,6 +212,7 @@ var Lily = function Lily (el) {
   observe(this.data);
   this.template = new Compile(this).template;
   this.render();
+  console.log(this);
 };
 
 Lily.prototype.render = function render () {
@@ -248,6 +250,10 @@ Lily.prototype.reactive = function reactive () {
   };
 
     for (var i = 0; i < keys.length; i++) loop( i );
+};
+
+Lily.mount = function mount (component) {
+  return new component()
 };
 
 Lily.prototype.config = {

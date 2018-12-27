@@ -1,0 +1,22 @@
+{
+  "name": "parcel-plugin-lily",
+  "version": "0.0.4",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imlinus/lily.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/imlinus/lily/issues"
+  },
+  "homepage": "https://github.com/imlinus/lily#readme",
+  "dependencies": {
+    "lily-compiler": "latest"
+  },
+  "peerDependencies": {
+    "parcel": "*"
+  }
+}
