@@ -1,0 +1,14 @@
+{
+  "name": "{{ name }}",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "parcel *.html",
+    "build": "parcel build *.html"
+  },
+  "dependencies": {
+    "lilyjs": "latest"
+  },
+  "devDependencies": {
+    "parcel": "latest"
+  }
+}
