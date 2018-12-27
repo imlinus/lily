@@ -8,10 +8,10 @@ const exec = require('child_process').exec
 const nameRE = /{{ name }}/g
 const name = process.argv[2]
 const repo = {
-	method: 'GET',
-	host: 'api.github.com',
-	path: '/repos/imlinus/lily/tarball/master',
-	headers: { 'User-Agent': 'Node.js' }
+  method: 'GET',
+  host: 'api.github.com',
+  path: '/repos/imlinus/lily/tarball/master',
+  headers: { 'User-Agent': 'Node.js' }
 }
 
 const rand = (lng = 9) => {
@@ -20,15 +20,15 @@ const rand = (lng = 9) => {
 }
 
 const download = res => {
-	const archive = path.join(__dirname, 'lily.tar.gz')
-	const stream = fs.createWriteStream(archive)
+  const archive = path.join(__dirname, 'lily.tar.gz')
+  const stream = fs.createWriteStream(archive)
 
-	res.on('data', chunk => stream.write(chunk))
+  res.on('data', chunk => stream.write(chunk))
 
-	res.on('end', () => {
-		stream.end()
+  res.on('end', () => {
+    stream.end()
     install(archive)
-	})
+  })
 }
 
 const install = archive => {
@@ -49,11 +49,11 @@ const clean = (archive, target) => {
     if (err) throw err
 
     create(target, target)
-    console.log(`
-To start, run:
-$ cd ${name}
-$ npm i
-$ npm start
+    console.log('\x1b[32m✔\x1b[0m Done!')
+    console.log(`Run:
+\x1b[34m$\x1b[0m cd ${name}
+\x1b[34m$\x1b[0m npm i
+\x1b[34m$\x1b[0m npm start
     `)
   })
 }
@@ -69,7 +69,7 @@ const create = (current, target) => {
       create(next, target)
     } else {
       fs.writeFileSync(next, fs.readFileSync(next).toString().replace(nameRE, name))
-      console.log('Created:', path.relative(target, next))
+      // console.log('Created:', path.relative(target, next))
     }
   }
 }
