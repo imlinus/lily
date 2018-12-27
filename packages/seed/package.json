@@ -2,6 +2,7 @@
   "name": "{{ name }}",
   "version": "0.0.1",
   "scripts": {
+    "start": "npm run dev",
     "dev": "parcel *.html",
     "build": "parcel build *.html"
   },

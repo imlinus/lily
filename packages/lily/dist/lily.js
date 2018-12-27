@@ -77,7 +77,7 @@ var Compile = function Compile (view) {
 };
 
 Compile.prototype.nodes = function nodes (el) {
-  var nodes = el.querySelectorAll('*');
+  var nodes = el.parentNode.querySelectorAll('*');
 
   for (var i = 0; i < nodes.length; i++) {
     this.bindMethods(nodes[i].attributes);
@@ -92,6 +92,7 @@ Compile.prototype.bindMethods = function bindMethods (nodes) {
     var key = attr.nodeValue;
     var el = attr.ownerElement;
 
+    if (/:style/.test(method)) { return this$1.style(el, key, method) }
     if (/bind/.test(method)) { return this$1.bind(el, key, method) }
     if (/@/.test(method)) { return this$1.on(el, key, method) }
     if (/loop/.test(method)) { return this$1.loop(el, key, method) }
@@ -173,6 +174,11 @@ Compile.prototype.bind = function bind (el, key, method) {
   });
 
   return el.value = this.view.data[key]
+};
+
+Compile.prototype.style = function style (el, key, method) {
+  var className = this.view.data[key];
+  el.classList.add(className);
 };
 
 var observe = function (data) {

@@ -1,7 +1,14 @@
 import Lily from './src/index.js'
+import css from 'lily-style'
 import HelloWorld from './helloworld.js'
 import Counter from './counter.js'
 import List from './list.js'
+
+const style = css`
+  h2 {
+    font-size: 2rem
+  }
+`
 
 class App extends Lily {
   components () {
@@ -14,13 +21,14 @@ class App extends Lily {
 
   data () {
     return {
-      title: '🌷 Lily.js'
+      title: '🌷 Lily.js',
+      style: style
     }
   }
 
   template () {
     return /* html */`
-      <div class="app">
+      <div class="app" :style="style">
         <helloworld></helloworld>
 
         <h2>{{ title }}</h2>
@@ -33,5 +41,4 @@ class App extends Lily {
   }
 }
 
-// const app = new App()
 Lily.mount(App)

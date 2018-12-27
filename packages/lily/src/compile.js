@@ -26,7 +26,7 @@ class Compile {
   }
 
   nodes (el) {
-    const nodes = el.querySelectorAll('*')
+    const nodes = el.parentNode.querySelectorAll('*')
 
     for (let i = 0; i < nodes.length; i++) {
       this.bindMethods(nodes[i].attributes)
@@ -39,6 +39,7 @@ class Compile {
       const key = attr.nodeValue
       const el = attr.ownerElement
 
+      if (/:style/.test(method)) return this.style(el, key, method)
       if (/bind/.test(method)) return this.bind(el, key, method)
       if (/@/.test(method)) return this.on(el, key, method)
       if (/loop/.test(method)) return this.loop(el, key, method)
@@ -116,6 +117,11 @@ class Compile {
     })
 
     return el.value = this.view.data[key]
+  }
+
+  style (el, key, method) {
+    const className = this.view.data[key]
+    el.classList.add(className)
   }
 }
 
