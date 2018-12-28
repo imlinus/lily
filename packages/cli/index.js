@@ -33,7 +33,7 @@ const download = res => {
 
 const install = archive => {
   const target = path.join(process.cwd(), name)
-  const tmp = rand(9)
+  const tmp = 'lily-' + rand(9)
 
   exec(`mkdir ${tmp} && tar -xvf ${archive} -C ${tmp} --strip=1`, err => {
     if (err) throw err

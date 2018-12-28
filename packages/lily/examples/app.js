@@ -4,11 +4,11 @@ import HelloWorld from './helloworld.js'
 import Counter from './counter.js'
 import List from './list.js'
 
-const style = css`
-  h2 {
-    font-size: 2rem
+const style = css({
+  'h2': {
+    fontSize: '2rem'
   }
-`
+})
 
 class App extends Lily {
   components () {

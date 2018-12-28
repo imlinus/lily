@@ -3,8 +3,6 @@ const rand = (lng = 9) => {
   return Math.random(0x7FFFFFFF).toString(18).slice(2, lng+2)
 }
 
-const sheet = document.head.appendChild(document.createElement('style'))
-
 const interleave = (strings, interpolations) => {
   return strings.reduce(
     (final, str, i) =>
@@ -13,17 +11,19 @@ const interleave = (strings, interpolations) => {
   )
 }
 
-const css = (strings, ...interpolations) => {
-  const styles = interleave(strings, interpolations)
-  const rules = styles.split('}')
-  const className = 'li' + rand(5)
-  let style = ''
+const css = css => {
+  console.log(css)
+  // const sheet = document.head.appendChild(document.createElement('style'))
+  // const styles = interleave(strings, interpolations)
+  // const rules = styles.split('}')
+  // const className = 'li' + rand(5)
+  // let style = ''
 
-  for (let i = 0; i < rules.length - 1; i++) {
-    style += '.' + className + ' ' + rules[i].trim() + ' }\n'
-  }
+  // for (let i = 0; i < rules.length - 1; i++) {
+  //   style += '.' + className + ' ' + rules[i].trim() + ' }\n'
+  // }
 
-  sheet.innerHTML = style
+  // sheet.innerHTML = style
 
   return className
 }
