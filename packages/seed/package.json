@@ -4,12 +4,19 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "parcel *.html",
-    "build": "parcel build *.html"
+    "build": "parcel build *.html",
+    "test": "echo Test",
+    "lint": "echo Lint"
   },
   "dependencies": {
     "lilyjs": "latest"
   },
   "devDependencies": {
+    "corgy": "latest",
     "parcel": "latest"
+  },
+  "hooks": {
+    "pre-commit": "npm test",
+    "pre-push": "npm run lint"
   }
 }

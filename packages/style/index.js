@@ -3,20 +3,12 @@ const rand = (lng = 9) => {
   return Math.random(0x7FFFFFFF).toString(18).slice(2, lng+2)
 }
 
-const interleave = (strings, interpolations) => {
-  return strings.reduce(
-    (final, str, i) =>
-      final + str + (interpolations[i] === undefined ? '' : interpolations[i]),
-    ''
-  )
-}
-
 const css = css => {
   console.log(css)
   // const sheet = document.head.appendChild(document.createElement('style'))
   // const styles = interleave(strings, interpolations)
   // const rules = styles.split('}')
-  // const className = 'li' + rand(5)
+  const className = 'li' + rand(5)
   // let style = ''
 
   // for (let i = 0; i < rules.length - 1; i++) {
