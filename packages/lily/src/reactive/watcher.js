@@ -1,8 +1,8 @@
 import Dep from './dep.js'
 
 class Watcher {
-  constructor (view, exp, cb) {
-    this.view = view
+  constructor (vm, exp, cb) {
+    this.vm = vm
     this.exp = exp
     this.cb = cb
 
@@ -11,7 +11,7 @@ class Watcher {
   }
 
   get () {
-    const val = this.view[this.exp]
+    const val = this.vm[this.exp]
     Dep.target = null
 
     return val

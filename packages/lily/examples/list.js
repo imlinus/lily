@@ -8,13 +8,21 @@ class List extends Lily {
   }
 
   template () {
-    return /* html */`
+    return `
       <ul class="list">
         <li loop="item in items">{{ item }}</li>
       </ul>
     `
   }
+
+  mounted () {
+    console.log('List mounted')
+    this.addItems()
+  }
+
+  addItems () {
+    this.set({ items: ['linus'] })
+  }
 }
 
-// const list = new List()
 export default List

@@ -6,9 +6,9 @@ class Lily {
   constructor (el) {
     this.el = (el && el instanceof HTMLElement ? el : el = document.body)
     if (this.data) this.data = this.data()
-    this.reactive()
+    this.reactive() 
     observe(this.data)
-    this.template = new Compile(this).template
+    this.template = new Compile(this).t
     this.render()
     console.log(this)
   }
@@ -25,6 +25,17 @@ class Lily {
 
   set (key, val) {
     this.data[key] = val
+    // const key = Object.keys(data)[0]
+    // const val = data[key]
+
+    // if (val.constructor === Array) {
+    //   this.data()[key].concat(val)
+    //   console.log(this.data()[key], val, this.data()[key].concat(val))
+    // } else if (val.constructor === Object) {
+    //   Object.assign(this.data[key], val)
+    // } else {
+    //   this.data[key] = data[key]
+    // }
   }
 
   reactive () {
@@ -46,8 +57,8 @@ class Lily {
     }
   }
 
-  static mount (component) {
-    return new component()
+  static mount (c) {
+    return new c()
   }
 }
 

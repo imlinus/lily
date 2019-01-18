@@ -14,8 +14,8 @@ Dep.prototype.notify = function notify () {
   }
 };
 
-var Watcher = function Watcher (view, exp, cb) {
-  this.view = view;
+var Watcher = function Watcher (vm, exp, cb) {
+  this.vm = vm;
   this.exp = exp;
   this.cb = cb;
 
@@ -24,7 +24,7 @@ var Watcher = function Watcher (view, exp, cb) {
 };
 
 Watcher.prototype.get = function get () {
-  var val = this.view[this.exp];
+  var val = this.vm[this.exp];
   Dep.target = null;
 
   return val
@@ -54,48 +54,46 @@ var html = function (html) {
   // return el.firstChild
 };
 
-var Compile = function Compile (view) {
-  this.view = view;
-  var hooks = this.view.__proto__;
+var Compile = function Compile (vm) {
+  this.vm = vm;
+  var hooks = this.vm.__proto__;
 
   if (hooks.beforeMount) { hooks.beforeMount(); }
 
-  if (this.view.components) {
-    this.components = this.view.components();
+  if (this.vm.components) {
+    this.c = this.vm.components();
   }
 
-  if (this.view.template) {
-    this.template = html(this.view.template());
+  if (this.vm.template) {
+    this.t = html(this.vm.template());
   }
 
-  this.walkNodes(this.template);
-  this.nodes(this.template);
+  this.walkNodes(this.t);
+  this.nodes(this.t);
 
   if (hooks.mounted) { hooks.mounted(); }
-
-  // console.log(this)
 };
 
 Compile.prototype.nodes = function nodes (el) {
   var nodes = el.parentNode.querySelectorAll('*');
 
   for (var i = 0; i < nodes.length; i++) {
-    this.bindMethods(nodes[i].attributes);
+    this.check(nodes[i].attributes);
   }
 };
 
-Compile.prototype.bindMethods = function bindMethods (nodes) {
+Compile.prototype.check = function check (nodes) {
     var this$1 = this;
 
   return Object.values(nodes).reduce(function (n, attr) {
-    var method = attr.nodeName;
+    var fn = attr.nodeName;
     var key = attr.nodeValue;
     var el = attr.ownerElement;
 
-    if (/:style/.test(method)) { return this$1.style(el, key, method) }
-    if (/bind/.test(method)) { return this$1.bind(el, key, method) }
-    if (/@/.test(method)) { return this$1.on(el, key, method) }
-    if (/loop/.test(method)) { return this$1.loop(el, key, method) }
+    if (/:style/.test(fn)) { return this$1.style(el, key, fn) }
+    if (/bind/.test(fn)) { return this$1.bind(el, key, fn) }
+    if (/@/.test(fn)) { return this$1.on(el, key, fn) }
+    if (/loop/.test(fn)) { return this$1.loop(el, key, fn) }
   }, [])
 };
 
@@ -110,9 +108,9 @@ Compile.prototype.walkNodes = function walkNodes (node) {
     var text = child.textContent;
 
     if (elementNode(child)) {
-      if (this.components && this.components.hasOwnProperty(child.localName)) {
-        var Component = this.components[child.localName];
-        new Component(child);
+      if (this.c && this.c.hasOwnProperty(child.localName)) {
+        var C = this.c[child.localName];
+        new C(child);
       }
     } else if (textNode(child) && regx.test(text)) {
       this.compileText(child, regx.exec(text)[1].trim());
@@ -125,60 +123,59 @@ Compile.prototype.walkNodes = function walkNodes (node) {
 };
 
 Compile.prototype.compileText = function compileText (node, exp) {
-  if (this.view.data) {
-    var text = this.view.data[exp];
+  if (this.vm.data) {
+    var text = this.vm.data[exp];
     node.textContent = text;
 
-    new Watcher(this.view, exp, function (val) {
+    new Watcher(this.vm, exp, function (val) {
       node.textContent = val ? val : '';
     });
   }
 };
 
-Compile.prototype.on = function on (el, key, method) {
+Compile.prototype.on = function on (el, key, fn) {
     var this$1 = this;
 
-  var evt = method.substr(1);
+  var evt = fn.substr(1);
 
   el.addEventListener(evt, function () {
-    if (this$1.view[key]) { this$1.view[key](event); }
+    if (this$1.vm[key]) { this$1.vm[key](event); }
   });
 };
 
-Compile.prototype.loop = function loop (el, key, method) {
-  var itemName = key.split('in')[0].replace(/\s/g, '');
-  var arrName = key.split('in')[1].replace(/\s/g, '');
-  var arr = this.view.data[arrName];
-  var parent = el.parentNode;
+Compile.prototype.loop = function loop (el, key, fn) {
+  var name = key.split('in')[1].replace(/\s/g, '');
+  var arr = this.vm.data[name];
+  var p = el.parentNode;
 
-  parent.removeChild(el);
+  p.removeChild(el);
 
   for (var i = 0; i < arr.length; i++) {
     var item = arr[i];
-    var $el = document.createElement(el.localName);
+    var node = document.createElement(el.localName);
 
-    $el.textContent = item;
-    parent.appendChild($el);
+    node.textContent = item;
+    p.appendChild(node);
   }
 };
 
-Compile.prototype.bind = function bind (el, key, method) {
+Compile.prototype.bind = function bind (el, key, fn) {
     var this$1 = this;
 
   el.addEventListener('input', function () {
-    this$1.view.data[key] = el.value;
+    this$1.vm.data[key] = el.value;
   });
 
-  new Watcher(this.view, method, function (val) {
+  new Watcher(this.vm, fn, function (val) {
     el.value = val;
   });
 
-  return el.value = this.view.data[key]
+  return el.value = this.vm.data[key]
 };
 
-Compile.prototype.style = function style (el, key, method) {
-  var className = this.view.data[key];
-  el.classList.add(className);
+Compile.prototype.style = function style (el, key, fn) {
+  var name = this.vm.data[key];
+  el.classList.add(name);
 };
 
 var observe = function (data) {
@@ -214,9 +211,9 @@ var defineReactive = function (target, key, val) {
 var Lily = function Lily (el) {
   this.el = (el && el instanceof HTMLElement ? el : el = document.body);
   if (this.data) { this.data = this.data(); }
-  this.reactive();
+  this.reactive(); 
   observe(this.data);
-  this.template = new Compile(this).template;
+  this.template = new Compile(this).t;
   this.render();
   console.log(this);
 };
@@ -233,6 +230,17 @@ Lily.prototype.get = function get (key) {
 
 Lily.prototype.set = function set (key, val) {
   this.data[key] = val;
+  // const key = Object.keys(data)[0]
+  // const val = data[key]
+
+  // if (val.constructor === Array) {
+  // this.data()[key].concat(val)
+  // console.log(this.data()[key], val, this.data()[key].concat(val))
+  // } else if (val.constructor === Object) {
+  // Object.assign(this.data[key], val)
+  // } else {
+  // this.data[key] = data[key]
+  // }
 };
 
 Lily.prototype.reactive = function reactive () {
@@ -258,8 +266,8 @@ Lily.prototype.reactive = function reactive () {
     for (var i = 0; i < keys.length; i++) loop( i );
 };
 
-Lily.mount = function mount (component) {
-  return new component()
+Lily.mount = function mount (c) {
+  return new c()
 };
 
 Lily.prototype.config = {

@@ -3,46 +3,44 @@ import * as is from './utils/is.js'
 import html from './utils/html.js'
 
 class Compile {
-  constructor (view) {
-    this.view = view
-    const hooks = this.view.__proto__
+  constructor (vm) {
+    this.vm = vm
+    const hooks = this.vm.__proto__
 
     if (hooks.beforeMount) hooks.beforeMount()
 
-    if (this.view.components) {
-      this.components = this.view.components()
+    if (this.vm.components) {
+      this.c = this.vm.components()
     }
 
-    if (this.view.template) {
-      this.template = html(this.view.template())
+    if (this.vm.template) {
+      this.t = html(this.vm.template())
     }
 
-    this.walkNodes(this.template)
-    this.nodes(this.template)
+    this.walkNodes(this.t)
+    this.nodes(this.t)
 
     if (hooks.mounted) hooks.mounted()
-
-    // console.log(this)
   }
 
   nodes (el) {
     const nodes = el.parentNode.querySelectorAll('*')
 
     for (let i = 0; i < nodes.length; i++) {
-      this.bindMethods(nodes[i].attributes)
+      this.check(nodes[i].attributes)
     }
   }
 
-  bindMethods (nodes) {
+  check (nodes) {
     return Object.values(nodes).reduce((n, attr) => {
-      const method = attr.nodeName
+      const fn = attr.nodeName
       const key = attr.nodeValue
       const el = attr.ownerElement
 
-      if (/:style/.test(method)) return this.style(el, key, method)
-      if (/bind/.test(method)) return this.bind(el, key, method)
-      if (/@/.test(method)) return this.on(el, key, method)
-      if (/loop/.test(method)) return this.loop(el, key, method)
+      if (/:style/.test(fn)) return this.style(el, key, fn)
+      if (/bind/.test(fn)) return this.bind(el, key, fn)
+      if (/@/.test(fn)) return this.on(el, key, fn)
+      if (/loop/.test(fn)) return this.loop(el, key, fn)
     }, [])
   }
 
@@ -57,9 +55,9 @@ class Compile {
       const text = child.textContent
 
       if (is.elementNode(child)) {
-        if (this.components && this.components.hasOwnProperty(child.localName)) {
-          const Component = this.components[child.localName]
-          new Component(child)
+        if (this.c && this.c.hasOwnProperty(child.localName)) {
+          const C = this.c[child.localName]
+          new C(child)
         }
       } else if (is.textNode(child) && regx.test(text)) {
         this.compileText(child, regx.exec(text)[1].trim())
@@ -72,56 +70,55 @@ class Compile {
   }
 
   compileText (node, exp) {
-    if (this.view.data) {
-      const text = this.view.data[exp]
+    if (this.vm.data) {
+      const text = this.vm.data[exp]
       node.textContent = text
 
-      new Watcher(this.view, exp, val => {
+      new Watcher(this.vm, exp, val => {
         node.textContent = val ? val : ''
       })
     }
   }
 
-  on (el, key, method) {
-    const evt = method.substr(1)
+  on (el, key, fn) {
+    const evt = fn.substr(1)
 
     el.addEventListener(evt, () => {
-      if (this.view[key]) this.view[key](event)
+      if (this.vm[key]) this.vm[key](event)
     })
   }
 
-  loop (el, key, method) {
-    const itemName = key.split('in')[0].replace(/\s/g, '')
-    const arrName = key.split('in')[1].replace(/\s/g, '')
-    const arr = this.view.data[arrName]
-    const parent = el.parentNode
+  loop (el, key, fn) {
+    const name = key.split('in')[1].replace(/\s/g, '')
+    const arr = this.vm.data[name]
+    const p = el.parentNode
 
-    parent.removeChild(el)
+    p.removeChild(el)
 
     for (let i = 0; i < arr.length; i++) {
       const item = arr[i]
-      const $el = document.createElement(el.localName)
+      const node = document.createElement(el.localName)
 
-      $el.textContent = item
-      parent.appendChild($el)
+      node.textContent = item
+      p.appendChild(node)
     }
   }
 
-  bind (el, key, method) {
+  bind (el, key, fn) {
     el.addEventListener('input', () => {
-      this.view.data[key] = el.value
+      this.vm.data[key] = el.value
     })
 
-    new Watcher(this.view, method, val => {
+    new Watcher(this.vm, fn, val => {
       el.value = val
     })
 
-    return el.value = this.view.data[key]
+    return el.value = this.vm.data[key]
   }
 
-  style (el, key, method) {
-    const className = this.view.data[key]
-    el.classList.add(className)
+  style (el, key, fn) {
+    const name = this.vm.data[key]
+    el.classList.add(name)
   }
 }
 
