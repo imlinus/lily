@@ -3,7 +3,7 @@ import Lily from './../src/index.js'
 class List extends Lily {
   data () {
     return {
-      items: ['foo', 'bar', 'baz'],
+      items: ['foo', 'bar', 'baz']
     }
   }
 
@@ -13,15 +13,6 @@ class List extends Lily {
         <li loop="item in items">{{ item }}</li>
       </ul>
     `
-  }
-
-  mounted () {
-    console.log('List mounted')
-    this.addItems()
-  }
-
-  addItems () {
-    this.set({ items: ['linus'] })
   }
 }
 

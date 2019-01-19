@@ -1,15 +1,18 @@
 class Dep {
   constructor () {
-    this.subs = []
+    this.subs = new Map()
   }
 
-  addSub (sub) {
-    this.subs.push(sub)
+  addSub (key, sub) {
+    const curr = this.subs.get(key)
+
+    if (curr) curr.add(sub)
+    else this.subs.set(key, new Set([sub]))
   }
 
-  notify () {
-    for (let i = 0; i < this.subs.length; i++) {
-      this.subs[i].update()
+  notify (key) {
+    if (this.subs.get(key)) {
+      this.subs.get(key).forEach(sub => sub.update())
     }
   }
 }

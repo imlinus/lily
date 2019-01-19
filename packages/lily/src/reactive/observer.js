@@ -1,33 +1,34 @@
 import Dep from './dep.js'
 
-const observe = data => {
-  if (!data || typeof data !== 'object') return
-
-  const keys = Object.keys(data)
-
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i]
-    defineReactive(data, key, data[key])
-  }
-}
-
-const defineReactive = (target, key, val) => {
+const Observer = obj => {
   const dep = new Dep()
-  observe(val)
 
-  Object.defineProperty(target, key, {
-    configurable: false,
-    enumerable: true,
-    get () {
-      Dep.target && dep.addSub(Dep.target)
-      return val
+  return new Proxy(obj, {
+    get (target, key, receiver) {
+      if (Dep.target) dep.addSub(key, Dep.target)
+
+      return Reflect.get(target, key, receiver)
     },
-    set (newVal) {
-      if (newVal === val) return
-      val = newVal
-      dep.notify()
+
+    set (target, key, value, receiver) {
+      if (Reflect.get(receiver, key) === value) return
+  
+      const res = Reflect.set(target, key, observ(value), receiver)
+      dep.notify(key)
+
+      return res
     }
   })
 }
 
-export default observe
+const observ = obj => {
+  if (!Object.prototype.toString.call(obj) === '[object Object]') return obj
+
+  Object.keys(obj).forEach(key => {
+    obj[key] = observ(obj[key])
+  })
+
+  return Observer(obj)
+}
+
+export default observ

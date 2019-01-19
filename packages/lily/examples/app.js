@@ -1,6 +1,4 @@
 import Lily from './src/index.js'
-// import HelloWorld from './helloworld.js'
-// import Counter from './counter.js'
 import List from './list.js'
 
 class App extends Lily {
@@ -17,7 +15,7 @@ class App extends Lily {
   }
 
   template () {
-    return /* html */`
+    return `
       <div class="app">
         <h2>{{ title }}</h2>
         <input type="text" bind="title" />

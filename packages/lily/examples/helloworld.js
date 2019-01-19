@@ -1,9 +1,12 @@
 import Lily from './../src/index.js'
 
 class HelloWorld extends Lily {
-  data () {
+  props () {
     return {
-      title: 'Hello, World.'
+      title: {
+        type: String,
+        default: 'Hello, world'
+      }
     }
   }
 
