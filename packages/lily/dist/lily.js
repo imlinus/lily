@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 var is = {
   elementNode: function (node) { return node.nodeType === 1; },
   textNode: function (node) { return node.nodeType === 3; },
@@ -63,17 +64,127 @@ var handler = function (data) {
 var Observer = function Observer (obj, data, orgObj) {
   if (is.obj(obj) && !is.arr(obj)) {
     var keys = Object.keys(obj);
+=======
+'use strict';
+
+var Dep = function Dep () {
+  this.subs = new Map();
+};
+
+Dep.prototype.addSub = function addSub (key, sub) {
+  var curr = this.subs.get(key);
+
+  if (curr) { curr.add(sub); }
+  else { this.subs.set(key, new Set([sub])); }
+};
+
+Dep.prototype.notify = function notify (key) {
+  if (this.subs.get(key)) {
+    this.subs.get(key).forEach(function (sub) { return sub.update(); });
+  }
+};
+
+var q = new Set();
+
+var nextTick = function (cb) {
+  Promise.resolve().then(cb);
+};
+
+var flush = function (args) {
+  q.forEach(function (watcher) { return watcher.run(); });
+  q = new Set();
+};
+
+var queue = function (watcher) {
+  q.add(watcher);
+  nextTick(flush);
+};
+
+var Watcher = function Watcher (vm, exp, cb) {
+  this.vm = vm;
+  this.exp = exp;
+  this.cb = cb;
+  this.value = this.get();
+};
+
+Watcher.prototype.get = function get () {
+  var exp = this.exp;
+  var val;
+  Dep.target = this;
+
+  if (typeof exp === 'function') {
+    val = exp.call(this.vm);
+  } else if (typeof exp === 'string') {
+    val = this.vm[exp];
+  }
+  
+  Dep.target = null;
+  return val
+};
+
+Watcher.prototype.update = function update () {
+  queue(this);
+};
+
+Watcher.prototype.run = function run () {
+  var val = this.get();
+  this.cb.call(this.vm, val, this.value);
+  this.value = val;
+};
+
+// import Dep from './dep.js'
+
+// class Watcher {
+//   constructor (vm, exp, cb) {
+//     this.vm = vm
+//     this.exp = exp
+//     this.cb = cb
+
+//     Dep.target = this
+//     this.val = this.get()
+//   }
+
+//   get () {
+//     const val = this.vm[this.exp]
+//     Dep.target = null
+
+//     return val
+//   }
+
+//   update () {
+//     const newVal = this.get()
+//     const oldVal = this.val
+
+//     if (newVal === oldVal) return
+
+//     this.val = newVal
+//     this.cb.call(this.vm, newVal, oldVal)
+//   }
+// }
+
+// export default Watcher
+
+var elementNode = function (node) { return node.nodeType === 1; };
+var textNode = function (node) { return node.nodeType === 3; };
+>>>>>>> d80b7c8dbd1df16056b8497074c8e1ada089f68a
 
     for (var i = 0; i < keys.length; i++) {
       if (typeof obj[keys[i]] === 'object') { data[keys[i]] = new Observer(obj[keys[i]], {}, orgObj); }
       else { data[keys[i]] = obj[keys[i]]; }
     }
 
+<<<<<<< HEAD
     return new Proxy(data, handler(orgObj || obj))
   }
 
   if (is.arr(obj)) { return new Proxy(obj, handler(orgObj|| obj)) }
   if (!is.obj(obj)) { return obj }
+=======
+  var el = document.createElement('html');
+  el.innerHTML = html.trim();
+
+  return el.children[1].firstChild
+>>>>>>> d80b7c8dbd1df16056b8497074c8e1ada089f68a
 };
 
 var observe = function (obj) {
@@ -189,12 +300,56 @@ Compiler.prototype.model = function model (el, key, exp) {
   return el.value = this.vm.data[key]
 };
 
+<<<<<<< HEAD
 var compiler = function (vm) { return new Compiler(vm); };
 
 var Lily = function Lily (el) {
   this.el = (el && el instanceof HTMLElement ? el : el = document.body);
   this.data = observe(this.data());
   this.template = compiler(this);
+=======
+Compile.prototype.style = function style (el, key, fn) {
+  var name = this.vm.data[key];
+  el.classList.add(name);
+};
+
+var Observer = function (obj) {
+  var dep = new Dep();
+
+  return new Proxy(obj, {
+    get: function get (target, key, receiver) {
+      if (Dep.target) { dep.addSub(key, Dep.target); }
+
+      return Reflect.get(target, key, receiver)
+    },
+
+    set: function set (target, key, value, receiver) {
+      if (Reflect.get(receiver, key) === value) { return }
+  
+      var res = Reflect.set(target, key, observ(value), receiver);
+      dep.notify(key);
+
+      return res
+    }
+  })
+};
+
+var observ = function (obj) {
+  if (!Object.prototype.toString.call(obj) === '[object Object]') { return obj }
+
+  Object.keys(obj).forEach(function (key) {
+    obj[key] = observ(obj[key]);
+  });
+
+  return Observer(obj)
+};
+
+var Lily = function Lily (el) {
+  this.el = (el && el instanceof HTMLElement ? el : el = document.body);
+  if (this.data) { this.data = observ(this.data()); }
+  this.reactive(); 
+  this.template = new Compile(this).t;
+>>>>>>> d80b7c8dbd1df16056b8497074c8e1ada089f68a
   this.render();
 };
 
@@ -204,8 +359,52 @@ Lily.prototype.render = function render () {
     : this.el.parentNode.replaceChild(this.template, this.el);
 };
 
+<<<<<<< HEAD
 Lily.mount = function mount (app) {
   return new app()
+=======
+Lily.prototype.get = function get (key) {
+  return this.data[key]
+};
+
+Lily.prototype.set = function set (data) {
+  this.data[key] = val;
+};
+
+Lily.prototype.reactive = function reactive () {
+    var this$1 = this;
+
+  var keys = Object.keys(this.data);
+
+  var loop = function ( i ) {
+    var key = keys[i];
+
+    Object.defineProperty(this$1, key, {
+      configurable: false,
+      enumerable: true,
+      get: function get () {
+        return this.data[key]
+      },
+      set: function set (val) {
+        this.data[key] = val;
+      }
+    });
+  };
+
+    for (var i = 0; i < keys.length; i++) loop( i );
+};
+
+Lily.mount = function mount (c) {
+  return new c()
+};
+
+Lily.use = function use (p) {
+  return new p()
+};
+
+Lily.prototype.config = {
+  silent: false
+>>>>>>> d80b7c8dbd1df16056b8497074c8e1ada089f68a
 };
 
 export default Lily;
