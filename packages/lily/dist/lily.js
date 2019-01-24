@@ -1,103 +1,139 @@
-'use strict';
-
-var Dep = function Dep () {
-  this.subs = [];
+var is = {
+  elementNode: function (node) { return node.nodeType === 1; },
+  textNode: function (node) { return node.nodeType === 3; },
+  obj: function (obj) { return obj != null && typeof obj === 'object'; },
+  arr: function (arr) { return Array.isArray(arr); }
 };
 
-Dep.prototype.addSub = function addSub (sub) {
-  this.subs.push(sub);
+var getObj = function (obj, root) {
+  if ( root === void 0 ) root = {};
+
+  if (!obj || is.obj(obj)) { return obj }
+  var clone = JSON.parse(JSON.stringify(obj));
+
+  for (var i in clone) {
+    if (typeof clone[i] !== 'object') { root[i] = clone[i]; }
+    else if (typeof clone[i] === 'object' && typeof clone[i].___value !== 'undefined') { root[i] = clone[i].___value; }
+    else if (is.arr(clone[i])) { root[i] = clone[i].splice(0); }
+    else if (typeof clone[i] === 'object') { root[i] = getObj(clone[i], {}); }
+  }
+
+  return root
 };
 
-Dep.prototype.notify = function notify () {
-  for (var i = 0; i < this.subs.length; i++) {
-    this.subs[i].update();
+var watch = function (obj, oldObj, target, name, val) {
+  if (obj && obj.watch && typeof obj.watch === 'function') {
+    obj.watch(getObj(obj), getObj(target), name, val);
   }
 };
 
-var Watcher = function Watcher (vm, exp, cb) {
-  this.vm = vm;
-  this.exp = exp;
-  this.cb = cb;
+var handler = function (data) {
+  return {
+    get: function (target, prop, receiver) { return target[prop]; },
 
-  Dep.target = this;
-  this.val = this.get();
+    deleteProperty: function (target, property) {
+      var deleted;
+      var oldVal = getObj(data);
+
+      if (is.obj(target) || is.arr(target)) { deleted = delete target[property]; }
+
+      watch(data, oldVal, target, property);
+      return deleted
+    },
+
+    set: function (target, name, val) {
+      var oldVal = getObj(data);
+
+      if (is.arr(target) && name === 'length') {
+        target[name] = val;
+        return target
+      }
+
+      if (is.arr(val)) { target[name] = new Proxy(val, handler); }
+      if (is.obj(val) && !is.arr(val)) { target[name] = new Observer(val, {}, data); }
+      if (!is.obj(val)) { target[name] = val; }
+
+      watch(data, oldVal, target, name, val);
+
+      return target
+    }
+  }
 };
 
-Watcher.prototype.get = function get () {
-  var val = this.vm[this.exp];
-  Dep.target = null;
+var Observer = function Observer (obj, data, orgObj) {
+  if (is.obj(obj) && !is.arr(obj)) {
+    var keys = Object.keys(obj);
 
-  return val
+    for (var i = 0; i < keys.length; i++) {
+      if (typeof obj[keys[i]] === 'object') { data[keys[i]] = new Observer(obj[keys[i]], {}, orgObj); }
+      else { data[keys[i]] = obj[keys[i]]; }
+    }
+
+    return new Proxy(data, handler(orgObj || obj))
+  }
+
+  if (is.arr(obj)) { return new Proxy(obj, handler(orgObj|| obj)) }
+  if (!is.obj(obj)) { return obj }
 };
 
-Watcher.prototype.update = function update () {
-  var newVal = this.get();
-  var oldVal = this.val;
+var observe = function (obj) {
+  var newState = {};
 
-  if (newVal === oldVal) { return }
-
-  this.val = newVal;
-  this.cb.call(this.vm, newVal, oldVal);
+  try {
+    return new Observer(obj, newState, newState)
+  } catch (e) {
+    return obj
+  }
 };
 
-var elementNode = function (node) { return node.nodeType === 1; };
-var textNode = function (node) { return node.nodeType === 3; };
-
-var html = function (html) {
-  if (!html) { return }
-
-  var el = document.createElement('html');
-  // const tmp = document.createElement('template')
-  el.innerHTML = html.trim();
-
-  return el.children[1].firstChild
-  // return el.firstChild
-};
-
-var Compile = function Compile (vm) {
+var Compiler = function Compiler (vm) {
   this.vm = vm;
   var hooks = this.vm.__proto__;
 
   if (hooks.beforeMount) { hooks.beforeMount(); }
 
-  if (this.vm.components) {
-    this.c = this.vm.components();
-  }
+  if (this.vm.components) { this.components = this.vm.components(); }
+  if (this.vm.template) { this.template = this.html(this.vm.template()); }
 
-  if (this.vm.template) {
-    this.t = html(this.vm.template());
-  }
-
-  this.walkNodes(this.t);
-  this.nodes(this.t);
+  this.walkNodes(this.template);
+  this.nodes(this.template);
 
   if (hooks.mounted) { hooks.mounted(); }
+
+  return this.template
 };
 
-Compile.prototype.nodes = function nodes (el) {
+Compiler.prototype.html = function html (html$1) {
+  if (!html$1) { return }
+  
+  var el = document.createElement('html');
+  el.innerHTML = html$1.trim();
+  
+  return el.children[1].firstChild
+};
+
+Compiler.prototype.nodes = function nodes (el) {
   var nodes = el.parentNode.querySelectorAll('*');
 
   for (var i = 0; i < nodes.length; i++) {
-    this.check(nodes[i].attributes);
+    this.checkAttrs(nodes[i].attributes);
   }
 };
 
-Compile.prototype.check = function check (nodes) {
+Compiler.prototype.checkAttrs = function checkAttrs (nodes) {
     var this$1 = this;
 
   return Object.values(nodes).reduce(function (n, attr) {
-    var fn = attr.nodeName;
-    var key = attr.nodeValue;
     var el = attr.ownerElement;
+    var key = attr.nodeValue;
+    var exp = attr.nodeName;
 
-    if (/:style/.test(fn)) { return this$1.style(el, key, fn) }
-    if (/bind/.test(fn)) { return this$1.bind(el, key, fn) }
-    if (/@/.test(fn)) { return this$1.on(el, key, fn) }
-    if (/loop/.test(fn)) { return this$1.loop(el, key, fn) }
+    if (/model/.test(exp)) { return this$1.model(el, key, exp) }
+    if (/@/.test(exp)) { return this$1.on(el, key, exp) }
   }, [])
 };
 
-Compile.prototype.walkNodes = function walkNodes (node) {
+Compiler.prototype.walkNodes = function walkNodes (node) {
   if (!node) { return }
 
   var childs = node.childNodes;
@@ -107,13 +143,15 @@ Compile.prototype.walkNodes = function walkNodes (node) {
     var regx = /\{\{(.*)\}\}/;
     var text = child.textContent;
 
-    if (elementNode(child)) {
-      if (this.c && this.c.hasOwnProperty(child.localName)) {
-        var C = this.c[child.localName];
-        new C(child);
+    if (regx.test(text)) {
+      this.text(child, regx.exec(text)[1].trim());
+    }
+
+    if (is.elementNode(child)) {
+      if (this.components && this.components.hasOwnProperty(child.localName)) {
+        var Child = this.components[child.localName];
+        new Child(child);
       }
-    } else if (textNode(child) && regx.test(text)) {
-      this.compileText(child, regx.exec(text)[1].trim());
     }
 
     if (child.childNodes && child.childNodes.length !== 0) {
@@ -122,100 +160,42 @@ Compile.prototype.walkNodes = function walkNodes (node) {
   }
 };
 
-Compile.prototype.compileText = function compileText (node, exp) {
-  if (this.vm.data) {
-    var text = this.vm.data[exp];
-    node.textContent = text;
+Compiler.prototype.text = function text (node, exp) {
+  var text = this.vm.data[exp];
+  node.textContent = text;
 
-    new Watcher(this.vm, exp, function (val) {
-      node.textContent = val ? val : '';
-    });
-  }
+  this.vm.data.watch = function (data) {
+    node.textContent = data[exp];
+  };
 };
 
-Compile.prototype.on = function on (el, key, fn) {
+Compiler.prototype.on = function on (el, key, exp) {
     var this$1 = this;
 
-  var evt = fn.substr(1);
+  var evt = exp.substr(1);
 
   el.addEventListener(evt, function () {
     if (this$1.vm[key]) { this$1.vm[key](event); }
   });
 };
 
-Compile.prototype.loop = function loop (el, key, fn) {
-  var name = key.split('in')[1].replace(/\s/g, '');
-  var arr = this.vm.data[name];
-  var p = el.parentNode;
-
-  p.removeChild(el);
-
-  for (var i = 0; i < arr.length; i++) {
-    var item = arr[i];
-    var node = document.createElement(el.localName);
-
-    node.textContent = item;
-    p.appendChild(node);
-  }
-};
-
-Compile.prototype.bind = function bind (el, key, fn) {
+Compiler.prototype.model = function model (el, key, exp) {
     var this$1 = this;
 
   el.addEventListener('input', function () {
     this$1.vm.data[key] = el.value;
   });
-
-  new Watcher(this.vm, fn, function (val) {
-    el.value = val;
-  });
-
+  
   return el.value = this.vm.data[key]
 };
 
-Compile.prototype.style = function style (el, key, fn) {
-  var name = this.vm.data[key];
-  el.classList.add(name);
-};
-
-var observe = function (data) {
-  if (!data || typeof data !== 'object') { return }
-
-  var keys = Object.keys(data);
-
-  for (var i = 0; i < keys.length; i++) {
-    var key = keys[i];
-    defineReactive(data, key, data[key]);
-  }
-};
-
-var defineReactive = function (target, key, val) {
-  var dep = new Dep();
-  observe(val);
-
-  Object.defineProperty(target, key, {
-    configurable: false,
-    enumerable: true,
-    get: function get () {
-      Dep.target && dep.addSub(Dep.target);
-      return val
-    },
-    set: function set (newVal) {
-      if (newVal === val) { return }
-      val = newVal;
-      dep.notify();
-    }
-  });
-};
+var compiler = function (vm) { return new Compiler(vm); };
 
 var Lily = function Lily (el) {
   this.el = (el && el instanceof HTMLElement ? el : el = document.body);
-  if (this.data) { this.data = this.data(); }
-  this.reactive(); 
-  observe(this.data);
-  this.template = new Compile(this).t;
+  this.data = observe(this.data());
+  this.template = compiler(this);
   this.render();
-  console.log(this);
 };
 
 Lily.prototype.render = function render () {
@@ -224,54 +204,8 @@ Lily.prototype.render = function render () {
     : this.el.parentNode.replaceChild(this.template, this.el);
 };
 
-Lily.prototype.get = function get (key) {
-  return this.data[key]
+Lily.mount = function mount (app) {
+  return new app()
 };
 
-Lily.prototype.set = function set (key, val) {
-  this.data[key] = val;
-  // const key = Object.keys(data)[0]
-  // const val = data[key]
-
-  // if (val.constructor === Array) {
-  // this.data()[key].concat(val)
-  // console.log(this.data()[key], val, this.data()[key].concat(val))
-  // } else if (val.constructor === Object) {
-  // Object.assign(this.data[key], val)
-  // } else {
-  // this.data[key] = data[key]
-  // }
-};
-
-Lily.prototype.reactive = function reactive () {
-    var this$1 = this;
-
-  var keys = Object.keys(this.data);
-
-  var loop = function ( i ) {
-    var key = keys[i];
-
-    Object.defineProperty(this$1, key, {
-      configurable: false,
-      enumerable: true,
-      get: function get () {
-        return this.data[key]
-      },
-      set: function set (val) {
-        this.data[key] = val;
-      }
-    });
-  };
-
-    for (var i = 0; i < keys.length; i++) loop( i );
-};
-
-Lily.mount = function mount (c) {
-  return new c()
-};
-
-Lily.prototype.config = {
-  silent: false
-};
-
-module.exports = Lily;
+export default Lily;

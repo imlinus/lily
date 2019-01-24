@@ -1,13 +1,13 @@
-import buble from 'rollup-plugin-buble'
 import uglify from 'rollup-plugin-uglify-es'
-import pkg from './package.json'
 import serve from 'rollup-plugin-serve'
+import buble from 'rollup-plugin-buble'
+import pkg from './package.json'
 
 export default [{
   entry: 'src/index.js',
   targets: [{
     dest: pkg.main,
-    format: 'cjs'
+    format: 'es'
   }],
   plugins: [
     buble({
@@ -23,7 +23,7 @@ export default [{
   entry: 'src/index.js',
   targets: [{
     dest: pkg.min,
-    format: 'cjs'
+    format: 'es'
   }],
   plugins: [
     buble({

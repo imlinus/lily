@@ -1,6 +1,6 @@
 {
-  "name": "lilyjs",
-  "version": "0.0.2",
+  "name": "lily",
+  "version": "0.1.0",
   "description": "",
   "main": "dist/lily.js",
   "min": "dist/lily.min.js",
@@ -12,7 +12,7 @@
   "devDependencies": {
     "rollup": "^0.68.2",
     "rollup-plugin-buble": "^0.19.6",
-    "rollup-plugin-serve": "^0.6.1",
+    "rollup-plugin-serve": "^1.0.0",
     "rollup-plugin-uglify-es": "0.0.1"
   },
   "repository": {
