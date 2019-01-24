@@ -1,4 +1,4 @@
-import Lily from 'lilyjs'
+import Lily from 'lily'
 
 class HelloWorld extends Lily {
   data () {

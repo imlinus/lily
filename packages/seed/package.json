@@ -9,7 +9,7 @@
     "lint": "echo Lint"
   },
   "dependencies": {
-    "lilyjs": "latest"
+    "lily": "latest"
   },
   "devDependencies": {
     "corgy": "latest",
