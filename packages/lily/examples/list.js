@@ -1,4 +1,4 @@
-import Lily from './../src/index.js'
+import Lily from './lily.js'
 
 class List extends Lily {
   data () {
@@ -13,6 +13,13 @@ class List extends Lily {
         <li loop="item in items">{{ item }}</li>
       </ul>
     `
+  }
+
+  mounted () {
+    setTimeout(() => {
+      this.data().items.push('linus')
+      // this.data.items.push('linus')
+    }, 1000)
   }
 }
 

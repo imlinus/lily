@@ -43,6 +43,7 @@ class Compiler {
 
       if (/model/.test(exp)) return this.model(el, key, exp)
       if (/@/.test(exp)) return this.on(el, key, exp)
+      if (/loop/.test(exp)) return this.loop(el, key, exp)
     }, [])
   }
 
@@ -96,6 +97,27 @@ class Compiler {
     })
   
     return el.value = this.vm.data[key]
+  }
+
+  loop (el, key, exp) {
+    const name = key.split('in')[1].replace(/\s/g, '')
+    const arr = this.vm.data[name]
+    const p = el.parentNode
+
+    p.removeChild(el)
+
+    for (let i = 0; i < arr.length; i++) {
+      const item = arr[i]
+      const node = document.createElement(el.localName)
+
+      node.textContent = item
+      p.appendChild(node)
+    }
+
+    this.vm.data.watch = data => {
+      console.log(data[name])
+      // node.textContent = data[exp]
+    }
   }
 }
 

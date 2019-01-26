@@ -1,4 +1,4 @@
-import Lily from './../src/index.js'
+import Lily from './lily.js'
 
 class Counter extends Lily {
   data () {

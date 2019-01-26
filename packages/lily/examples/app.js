@@ -1,5 +1,6 @@
 import Lily from './lily.js'
 import Counter from './counter.js'
+import List from './list.js'
 
 class App extends Lily {
   data () {
@@ -10,7 +11,8 @@ class App extends Lily {
 
   components () {
     return {
-      counter: Counter
+      counter: Counter,
+      list: List
     }
   }
 
@@ -19,7 +21,9 @@ class App extends Lily {
       <div class="app">
         <h2>{{ title }}</h2>
         <input type="text" model="title" />
+
         <counter></counter>
+        <list></list>
       </div>
     `
   }

@@ -130,6 +130,7 @@ Compiler.prototype.checkAttrs = function checkAttrs (nodes) {
 
     if (/model/.test(exp)) { return this$1.model(el, key, exp) }
     if (/@/.test(exp)) { return this$1.on(el, key, exp) }
+    if (/loop/.test(exp)) { return this$1.loop(el, key, exp) }
   }, [])
 };
 
@@ -187,6 +188,27 @@ Compiler.prototype.model = function model (el, key, exp) {
   });
   
   return el.value = this.vm.data[key]
+};
+
+Compiler.prototype.loop = function loop (el, key, exp) {
+  var name = key.split('in')[1].replace(/\s/g, '');
+  var arr = this.vm.data[name];
+  var p = el.parentNode;
+
+  p.removeChild(el);
+
+  for (var i = 0; i < arr.length; i++) {
+    var item = arr[i];
+    var node = document.createElement(el.localName);
+
+    node.textContent = item;
+    p.appendChild(node);
+  }
+
+  this.vm.data.watch = function (data) {
+    console.log(data[name]);
+    // node.textContent = data[exp]
+  };
 };
 
 var compiler = function (vm) { return new Compiler(vm); };

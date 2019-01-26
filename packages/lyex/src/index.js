@@ -1,19 +1,10 @@
 let store = {}
 
-const callSubs = (key, newVal, prevVal) => {
-  const subs = store[key].subs
-
-  for (let i = 0; i < subs.length; i++) {
-    const cb = subs[i]
-    if (typeof cb === 'function') cb(newVal, prevVal)
-  }
-
-  // store[key].subs.forEach(cb => {
-  //   if (typeof cb === 'function') cb(newVal, prevVal)
-  // })
-}
-
 const lyex = {
+  get (key) {
+    return !store[key] ? undefined : store[key].val
+  },
+
   set (key, val) {
     let currVal = undefined
 
@@ -30,11 +21,7 @@ const lyex = {
     callSubs(key, val, currVal)
   },
 
-  get (key) {
-    return !store[key] ? undefined : store[key].val
-  },
-
-  subscribe (key, cb, opts = {}) {
+  listen (key, cb, opts = {}) {
     let i = 1
 
     if (!store[key]) {
@@ -51,6 +38,15 @@ const lyex = {
     return () => {
       delete store[key].subs[i - 1]
     }
+  }
+}
+
+const callSubs = (key, newVal, oldVal) => {
+  const subs = store[key].subs
+
+  for (let i = 0; i < subs.length; i++) {
+    const cb = subs[i]
+    if (cb.constructor === Function) cb(newVal, oldVal)
   }
 }
 
