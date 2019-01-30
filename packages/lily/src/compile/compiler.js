@@ -78,9 +78,9 @@ class Compiler {
     const text = this.vm.data[exp]
     node.textContent = text
 
-    this.vm.data.watch = data => {
-      node.textContent = data[exp]
-    }
+    this.vm.data.watch(changes => {
+      node.textContent = changes.get(exp)
+    })
   }
 
   on (el, key, exp) {
@@ -112,11 +112,6 @@ class Compiler {
 
       node.textContent = item
       p.appendChild(node)
-    }
-
-    this.vm.data.watch = data => {
-      console.log(data[name])
-      // node.textContent = data[exp]
     }
   }
 }

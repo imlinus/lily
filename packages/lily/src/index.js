@@ -1,4 +1,4 @@
-import observe from './proxy/observe.js'
+import observe from './proxy/index.js'
 import compiler from './compile/compiler.js'
 import is from './utils/is.js'
 
@@ -8,6 +8,7 @@ class Lily {
     this.data = observe(this.data())
     this.template = compiler(this)
     this.render()
+    console.log(this)
   }
 
   render () {

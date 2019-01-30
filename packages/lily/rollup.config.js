@@ -10,10 +10,10 @@ export default [{
     format: 'es'
   }],
   plugins: [
-    buble({
-      exclude: ['node_modules/**'],
-      transforms: { dangerousForOf: true }
-    }),
+    // buble({
+    //   exclude: ['node_modules/**'],
+    //   transforms: { dangerousForOf: true }
+    // }),
     serve({
       open: true,
       contentBase: ['./', 'dist', 'examples', 'src'],
@@ -26,10 +26,10 @@ export default [{
     format: 'es'
   }],
   plugins: [
-    buble({
-      exclude: ['node_modules/**'],
-      transforms: { dangerousForOf: true }
-    }),
+    // buble({
+    //   exclude: ['node_modules/**'],
+    //   transforms: { dangerousForOf: true }
+    // }),
     uglify()
   ]
 }]
