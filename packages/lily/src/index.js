@@ -5,7 +5,7 @@ import is from './utils/is.js'
 class Lily {
   constructor (el) {
     this.el = (el && el instanceof HTMLElement ? el : el = document.body)
-    this.data = observe(this.data())
+    if (this.data()) this.data = observe(this.data())
     this.template = compiler(this)
     this.render()
     console.log(this)

@@ -6,14 +6,15 @@ import pkg from './package.json'
 export default [{
   entry: 'src/index.js',
   targets: [{
+    name: 'Lily',
     dest: pkg.main,
-    format: 'es'
+    format: 'iife'
   }],
   plugins: [
-    // buble({
-    //   exclude: ['node_modules/**'],
-    //   transforms: { dangerousForOf: true }
-    // }),
+    buble({
+      exclude: ['node_modules/**'],
+      transforms: { dangerousForOf: true }
+    }),
     serve({
       open: true,
       contentBase: ['./', 'dist', 'examples', 'src'],
@@ -22,14 +23,15 @@ export default [{
 }, {
   entry: 'src/index.js',
   targets: [{
+    name: 'Lily',
     dest: pkg.min,
-    format: 'es'
+    format: 'iife'
   }],
   plugins: [
-    // buble({
-    //   exclude: ['node_modules/**'],
-    //   transforms: { dangerousForOf: true }
-    // }),
+    buble({
+      exclude: ['node_modules/**'],
+      transforms: { dangerousForOf: true }
+    }),
     uglify()
   ]
 }]
