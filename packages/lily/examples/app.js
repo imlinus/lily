@@ -15,7 +15,7 @@ class App extends Lily {
   }
 
   template () {
-    return `
+    return /* html */`
       <div class="app">
         <h2>{{ title }}</h2>
         <input type="text" model="title" />

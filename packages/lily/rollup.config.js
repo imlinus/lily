@@ -8,12 +8,15 @@ export default [{
   targets: [{
     name: 'Lily',
     dest: pkg.main,
-    format: 'iife'
+    format: 'esm'
   }],
   plugins: [
     buble({
       exclude: ['node_modules/**'],
-      transforms: { dangerousForOf: true }
+      transforms: {
+        dangerousForOf: true
+      },
+      objectAssign: 'Object.assign'
     }),
     serve({
       open: true,
@@ -25,12 +28,15 @@ export default [{
   targets: [{
     name: 'Lily',
     dest: pkg.min,
-    format: 'iife'
+    format: 'esm'
   }],
   plugins: [
     buble({
       exclude: ['node_modules/**'],
-      transforms: { dangerousForOf: true }
+      transforms: {
+        dangerousForOf: true
+      },
+      objectAssign: 'Object.assign'
     }),
     uglify()
   ]

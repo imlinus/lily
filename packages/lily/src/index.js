@@ -1,14 +1,12 @@
-import observe from './proxy/index.js'
-import compiler from './compile/compiler.js'
-import is from './utils/is.js'
+import { observe } from './observe.js'
+import compile from './compile.js'
 
 class Lily {
   constructor (el) {
     this.el = (el && el instanceof HTMLElement ? el : el = document.body)
-    if (this.data()) this.data = observe(this.data())
-    this.template = compiler(this)
+    this.data = observe(this.data())
+    this.template = compile(this)
     this.render()
-    console.log(this)
   }
 
   render () {
