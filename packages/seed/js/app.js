@@ -1,4 +1,4 @@
-import Lily from 'lilyjs'
+import Lily from '//unpkg.com/lily'
 import HelloWorld from './components/helloworld.js'
 
 class App extends Lily {
@@ -15,7 +15,7 @@ class App extends Lily {
   }
 
   template () {
-    return `
+    return /* html */`
       <div class="app">
         <h1>{{ title }}</h1>
         <helloworld></helloworld>

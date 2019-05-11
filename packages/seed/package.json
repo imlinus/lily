@@ -2,18 +2,13 @@
   "name": "{{ name }}",
   "version": "0.0.1",
   "scripts": {
-    "start": "npm run dev",
-    "dev": "parcel *.html",
-    "build": "parcel build *.html",
+    "start": "node server.js",
     "test": "echo Test",
     "lint": "echo Lint"
   },
-  "dependencies": {
-    "lily": "latest"
-  },
   "devDependencies": {
     "corgy": "latest",
-    "parcel": "latest"
+    "kyparn": "latest"
   },
   "hooks": {
     "pre-commit": "npm test",

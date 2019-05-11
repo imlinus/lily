@@ -1,4 +1,4 @@
-import Lily from 'lily'
+import Lily from '//unpkg.com/lily'
 
 class HelloWorld extends Lily {
   data () {
@@ -8,7 +8,7 @@ class HelloWorld extends Lily {
   }
 
   template () {
-    return `
+    return /* html */`
       <div class="hello-world">
         <h3>{{ title }}</h3>
       </div>
