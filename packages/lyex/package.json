@@ -1,6 +1,6 @@
 {
   "name": "lyex",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "dist/lyex.js",
   "min": "dist/lyex.min.js",

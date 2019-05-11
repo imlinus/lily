@@ -6,8 +6,9 @@ import pkg from './package.json'
 export default [{
   entry: 'src/index.js',
   targets: [{
+    name: 'lyex',
     dest: pkg.main,
-    format: 'es'
+    format: 'iife'
   }],
   plugins: [
     buble({
@@ -22,8 +23,9 @@ export default [{
 }, {
   entry: 'src/index.js',
   targets: [{
+    name: 'lyex',
     dest: pkg.min,
-    format: 'es'
+    format: 'iife'
   }],
   plugins: [
     buble({
