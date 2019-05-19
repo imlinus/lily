@@ -19,7 +19,7 @@ class Lily {
   }
 
   static mount (app) {
-    return new app()
+    return new app(document.body)
   }
 }
 

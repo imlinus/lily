@@ -17,6 +17,7 @@ class Component {
       
       $props.forEach(obj => {
         const prop = this.props[obj.key]
+
         if (prop.type === obj.val.constructor) {
           this.props[obj.key].value = obj.val
         } else throw new Error('Prop not found')
