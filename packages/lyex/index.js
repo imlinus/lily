@@ -1,6 +1,6 @@
 let store = {}
 
-const lyex = {
+export default {
   get (key) {
     return !store[key] ? undefined : store[key].val
   },
@@ -41,13 +41,11 @@ const lyex = {
   }
 }
 
-const callSubs = (key, newVal, oldVal) => {
+const callSubs = (key, val, old) => {
   const subs = store[key].subs
 
   for (let i = 0; i < subs.length; i++) {
     const cb = subs[i]
-    if (cb.constructor === Function) cb(newVal, oldVal)
+    if (cb.constructor === Function) cb(val, old)
   }
 }
-
-export default lyex
