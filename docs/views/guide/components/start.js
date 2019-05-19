@@ -1,25 +1,35 @@
 import Lily from 'https://unpkg.com/lily@0.2.2/index.js'
+import syntax from './../../../lil-syntax.js'
+
+const code = document.createElement('code')
+const template = syntax(`
+import Lily from '//unpkg.com/lily'
+
+class Start extends Lily {
+  template () {
+    return \`
+      <section class="container">
+        <h3>Start</h3>
+        <p>Lorem ipsum</p>
+      <section>
+    \`
+  }
+}
+
+export default Start
+`.trim(''))
+
+code.innerHTML = template
+
+code.style.whiteSpace = 'pre-wrap'
+code.style.display = 'block'
 
 class Start extends Lily {
   template () {
     return /* html */`
       <div>
         <h3>start.js</h3>
-
-        <code class="js" style="display: block; white-space: pre-wrap;">import Lily from '//unpkg.com/lily'
-
-class Start extends Lily {
-  template () {
-    return &#96;
-      &lt;section class="container">
-        &lt;h3>Start&lt;/h3>
-        &lt;p>Lorem ipsum&lt;/p>
-      &lt;section>
-    &#96;
-  }
-}
-
-export default Start</code>
+        ${code.outerHTML}
       </div>
     `
   }

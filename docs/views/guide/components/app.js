@@ -1,12 +1,9 @@
 import Lily from 'https://unpkg.com/lily@0.2.2/index.js'
+import syntax from './../../../lil-syntax.js'
 
-class App extends Lily {
-  template () {
-    return /* html */`
-      <div>
-        <h3>app.js</h3>
-
-        <code class="js" style="display: block; white-space: pre-wrap;">import Lily from '//unpkg.com/lily'
+const code = document.createElement('code')
+const template = syntax(`
+import Lily from '//unpkg.com/lily'
 import Router from '//unpkg.com/lily-router'
 
 import Start from './start.js'
@@ -25,12 +22,12 @@ class App extends Lily {
   }
 
   template () {
-    return &#96;
-      &lt;div class="app"&gt;
-        &lt;navigation>&lt;/navigation>
-        &lt;div class="wrapper" router&gt;&lt;/div&gt;
-      &lt;/div&gt;
-    &#96;
+    return \`
+      <div class="app">
+        <navigation></navigation>
+        <div class="wrapper" router></div>
+      </div>
+    \`
   }
 
   mounted () {
@@ -38,7 +35,20 @@ class App extends Lily {
   }
 }
 
-Lily.mount(App)</code>
+Lily.mount(App)
+`.trim(''))
+
+code.innerHTML = template
+
+code.style.whiteSpace = 'pre-wrap'
+code.style.display = 'block'
+
+class App extends Lily {
+  template () {
+    return /* html */`
+      <div>
+        <h3>app.js</h3>
+        ${code.outerHTML}
       </div>
     `
   }
