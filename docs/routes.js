@@ -1,4 +1,4 @@
-import Start from './views/start.js'
+import Start from './views/start/start.js'
 import Guide from './views/guide/guide.js'
 import Docs from './views/docs/docs.js'
 

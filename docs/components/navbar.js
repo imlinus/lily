@@ -12,15 +12,11 @@ class Navbar extends Lily {
 
   template () {
     return /* html */`
-      <div class="topbar secondary is-fixed navbar">
+      <div class="topbar navbar">
         <brand brand="Lily.js"></brand>        
         <navigation></navigation>
       </div>
     `
-  }
-
-  mounted () {
-    document.documentElement.classList.add('has-fixed-topbar')
   }
 }
 

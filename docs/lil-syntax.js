@@ -2,7 +2,7 @@ const comment = new RegExp(`(?:/(?:^|\s)\/\/(.+?)$/gm)|(?:/\/\*([\S\s]*?)\*\//gm
 
 const toComment = cm => `<span style="color: slategray">${cm}</span>`
 
-const defaultColors = ['56b6c2', '61aeee', 'c678dd', '98c379', 'e06c75', 'be5046', 'd19a66', 'e6c07b', 'ccd1da']
+const defaultColors = ['56b6c2', '61aeee', 'c678dd', '98c379', 'e06c75', 'be5046', 'd19a66', 'e6c07b']
 
 const syntax = (input, { colors = defaultColors } = {}) => {
   let index = 0
