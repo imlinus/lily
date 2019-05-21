@@ -1,6 +1,4 @@
 import Lily from '//unpkg.com/lily'
-import syntax from './../../../lil-syntax.js'
-
 import Columns from './columns.js'
 
 class Intro extends Lily {
