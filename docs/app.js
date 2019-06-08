@@ -1,27 +1,31 @@
-import Lily from 'https://unpkg.com/lily@0.2.2/index.js'
+import Lily from '//unpkg.com/lily'
 import LilyRouter from '//unpkg.com/lily-router'
 
-import Navbar from './components/navbar.js'
+import Topbar from './components/topbar.js'
+import Footer from './components/footer.js'
 import routes from './routes.js'
 
 class App extends Lily {
   components () {
     return {
-      navbar: Navbar
+      topbar: Topbar,
+      footer: Footer
     }
   }
 
   template () {
     return /* html */`
       <div class="app">
-        <navbar></navbar>
+        <topbar></topbar>
         <div class="wrapper" router></div>
+        <footer></footer>
       </div>
     `
   }
 
   mounted () {
     new LilyRouter(routes)
+    document.documentElement.setAttribute('theme', 'dark')
   }
 }
 

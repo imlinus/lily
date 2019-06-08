@@ -1,4 +1,4 @@
-import Lily from 'https://unpkg.com/lily@0.2.2/index.js'
+import Lily from '//unpkg.com/lily'
 
 class Hero extends Lily {
   template () {
@@ -7,14 +7,22 @@ class Hero extends Lily {
         <h1>🌷</h1>
         <h3>Reactive UI components</h3>
 
-        <div class="buttons">
-          <a href="#/guide" class="btn primary">Guide</a>
-          <a href="#/docs" class="btn outline">Docs</a>
+        <div class="buttons is-centered">
+          <button class="is-secondary" @click="guide">Guide</button>
+          <button class="button outline" @click="docs">Docs</a>
         </div>
 
-        <pre>https://unpkg.com/lily</pre>
+        <pre><a href="//unpkg.com/lily">//unpkg.com/lily</a></pre>
       </div>
     `
+  }
+
+  guide () {
+    window.location.href = '#/guide'
+  }
+
+  docs () {
+    window.location.href = '#/docs'
   }
 }
 

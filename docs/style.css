@@ -1,82 +1,51 @@
-body {
-  background: #1d2027;
-  color: white;
+:root {
+  --dark: #2c3e50;
+  --dark-accent: #34495e;
 }
 
-.topbar {
-  background: #1d2027;
+.topbar,
+.footer {
+  background: transparent;
   box-shadow: none;
 }
 
-code {
-  background: #282c34;
-  border: 1px solid #1d2027;
-  color: #ABB2BF;
-  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-  text-align: left;
-  white-space: pre;
-  word-spacing: normal;
-  word-break: normal;
-  word-wrap: normal;
-  line-height: 2;
-  tab-size: 2;
-  hyphens: none;
-  font-size: 90%;
-  overflow-x: auto;
-  margin: 0;
+.buttons.is-centered {
+  justify-content: center;
 }
 
-pre {
-  display: inline-block;
-  background: #282c34;
-  border: 1px solid #1d2027;
+.buttons button:last-of-type {
+  margin-right: 0;
+}
+
+code, pre {
+  background: var(--dark);
+  border-radius: 0.25rem;
+  margin-top: var(--gap);
+  padding: calc(var(--gap) / 2);
 }
 
 .hero {
   text-align: center;
   padding: 4rem;
-  /* background: linear-gradient(15deg, #F7A3EE, #f35be2); */
 }
 
 .hero h1 {
   color: white;
   letter-spacing: 4px;
-  text-shadow: 0px 8px 10px #191c236e, -1px -1px 0 #191c23, 1px -1px 0 #191c23, -1px 1px 0 #191c23, 1px 1px 0 #191c23;
+  text-shadow: 0px 8px 10px var(--dark),
+               -1px -1px 0 var(--dark-accent),
+               1px -1px 0 var(--dark-accent),
+               -1px 1px 0 var(--dark-accent),
+               1px 1px 0 var(--dark-accent);
   font-size: 3rem;
 }
 
 .hero h3 {
   color: white;
   letter-spacing: 1px;
-  text-shadow: 0px 8px 10px #191c236e, -1px -1px 0 #191c23, 1px -1px 0 #191c23, -1px 1px 0 #191c23, 1px 1px 0 #191c23;
-}
-
-.buttons {
-  margin-bottom: 1.5rem;
-}
-
-.columns {
-  margin-left: -0.75rem;
-  margin-right: -0.75rem;
-  margin-top: -0.75rem;
-}
-
-.columns:last-child {
-  margin-bottom: -0.75rem;
-}
-
-.columns:not(:last-child) {
-  margin-bottom: calc(1.5rem - 0.75rem);
-}
-
-.columns.is-centered {
-  justify-content: center;
-}
-
-.column {
-  display: block;
-  flex-basis: 0;
-  flex-grow: 1;
-  flex-shrink: 1;
-  padding: 0.75rem;
+  text-shadow: 0px 8px 10px var(--dark),
+               -1px -1px 0 var(--dark-accent),
+               1px -1px 0 var(--dark-accent),
+               -1px 1px 0 var(--dark-accent),
+               1px 1px 0 var(--dark-accent);
 }

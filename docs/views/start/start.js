@@ -1,4 +1,4 @@
-import Lily from 'https://unpkg.com/lily@0.2.2/index.js'
+import Lily from '//unpkg.com/lily'
 
 import Hero from './components/hero.js'
 import Intro from './components/intro.js'

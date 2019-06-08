@@ -1,8 +1,8 @@
 import Lily from '//unpkg.com/lily'
-import syntax from './../../../lil-syntax.js'
+import highlite from '//unpkg.com/highlite'
 
 const code = document.createElement('code')
-const template = syntax(`
+const template = highlite(`
 import Lily from '//unpkg.com/lily'
 
 class App extends Lily {
@@ -26,12 +26,15 @@ Lily.mount(App)
 `.trim(''))
 
 code.innerHTML = template
+
+code.style.whiteSpace = 'pre-wrap'
 code.style.display = 'block'
 
 class Example extends Lily {
   template () {
+    
     return /* html */`
-      <div class="column">
+      <div class="col">
         ${code.outerHTML}
       </div>
     `

@@ -1,16 +1,16 @@
-import Lily from 'https://unpkg.com/lily@0.2.2/index.js'
+import Lily from '//unpkg.com/lily'
 
 class Navigation extends Lily {
   template () {
     return /* html */`
-      <ul class="navbar-items">
-        <li class="navbar-item">
+      <ul>
+        <li class="nav-item">
           <a href="#/">Home</a>
         </li>
-        <li class="navbar-item">
+        <li class="nav-item">
           <a href="#/guide">Guide</a>
         </li>
-        <li class="navbar-item">
+        <li class="nav-item">
           <a href="#/docs">Docs</a>
         </li>
       </ul>

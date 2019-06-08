@@ -1,4 +1,4 @@
-import Lily from 'https://unpkg.com/lily@0.2.2/index.js'
+import Lily from '//unpkg.com/lily'
 import Brand from './brand.js'
 import Navigation from './navigation.js'
 
@@ -12,11 +12,15 @@ class Navbar extends Lily {
 
   template () {
     return /* html */`
-      <div class="topbar navbar">
+      <div class="topbar is-fixed nav">
         <brand brand="Lily.js"></brand>        
         <navigation></navigation>
       </div>
     `
+  }
+
+  mounted () {
+    document.documentElement.classList.add('has-fixed-topbar')
   }
 }
 

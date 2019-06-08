@@ -1,8 +1,8 @@
-import Lily from 'https://unpkg.com/lily@0.2.2/index.js'
-import syntax from './../../../lil-syntax.js'
+import Lily from '//unpkg.com/lily'
+import highlite from '//unpkg.com/highlite'
 
 const code = document.createElement('code')
-const template = syntax(`
+const template = highlite(`
 import Lily from '//unpkg.com/lily'
 
 class Navigation extends Lily {

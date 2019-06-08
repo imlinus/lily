@@ -13,7 +13,7 @@ class Columns extends Lily {
 
   template () {
     return /* html */`
-      <div class="columns">
+      <div class="row">
         <example></example>
         <hello></hello>
       </div>

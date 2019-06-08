@@ -1,4 +1,4 @@
-import Lily from 'https://unpkg.com/lily@0.2.2/index.js'
+import Lily from '//unpkg.com/lily'
 
 class Brand extends Lily {
   props () {
@@ -13,7 +13,7 @@ class Brand extends Lily {
   template () {
     return /* html */`
       <div class="navbar-brand">
-        <h1 class="text-white">{{ brand }}</h1>
+        <h2 class="text-white">{{ brand }}</h2>
       </div>
     `
   }
