@@ -49,8 +49,8 @@ class Component {
       const regx = /\{\{(.*)\}\}/
       const text = child.textContent
 
-      if (regx.test(text)) { 
-        this.text(child, regx.exec(text)[1].trim())
+      if (regx.test(text)) {
+        this.text(child, regx.exec(text)[1].trim(), text)
       }
 
       if (child.nodeType === 1 && this.components && this.components.hasOwnProperty(child.localName)) {
@@ -85,7 +85,9 @@ class Component {
     }, [])
   }
 
-  text (node, key) {
+  text (node, key, text) {
+    const regx = /\{\{(.*)\}\}/
+
     if (this.data) {
       node.textContent = this.data[key]
 
@@ -93,7 +95,7 @@ class Component {
         node.textContent = data[key]
       })
     } else if (this.props) {
-      node.textContent = (this.props[key].value ? this.props[key].value : this.props[key].default)
+      node.textContent = text.replace(regx, (this.props[key].value ? this.props[key].value : this.props[key].default))
     }
   }
 
