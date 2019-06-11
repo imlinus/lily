@@ -1,0 +1,23 @@
+{
+  "name": "lily",
+  "version": "0.2.2",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imlinus/lily.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/imlinus/lily/issues"
+  },
+  "homepage": "https://github.com/imlinus/lily#readme",
+  "devDependencies": {
+    "kyparn": "latest"
+  }
+}
