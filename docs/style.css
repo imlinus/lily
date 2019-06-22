@@ -9,21 +9,6 @@
   box-shadow: none;
 }
 
-.buttons.is-centered {
-  justify-content: center;
-}
-
-.buttons button:last-of-type {
-  margin-right: 0;
-}
-
-code, pre {
-  background: var(--dark);
-  border-radius: 0.25rem;
-  margin-top: var(--gap);
-  padding: calc(var(--gap) / 2);
-}
-
 .hero {
   text-align: center;
   padding: 4rem;
