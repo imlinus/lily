@@ -1,17 +1,22 @@
 import Lily from '//unpkg.com/lily'
 
 class HelloWorld extends Lily {
-  data () {
+  name () {
+    return 'hello-world'
+  }
+
+  props () {
     return {
-      title: 'Hello, World.'
+      name: {
+        type: String,
+        default: 'world.'
+      }
     }
   }
 
   template () {
     return /* html */`
-      <div class="hello-world">
-        <h3>{{ title }}</h3>
-      </div>
+      <h3>Hello, {{ name }}</h3>
     `
   }
 }

@@ -1,27 +1,29 @@
 import Lily from '//unpkg.com/lily'
 import HelloWorld from './components/helloworld.js'
 
-class App extends Lily {
-  data () {
-    return {
-      title: 'Hello, Lily'
-    }
+class MainView extends Lily {
+  name () {
+    return 'main-view'
   }
 
   components () {
     return {
-      helloworld: HelloWorld
+      'hello-world': HelloWorld
     }
   }
 
   template () {
     return /* html */`
       <div class="app">
-        <h1>{{ title }}</h1>
-        <helloworld></helloworld>
+        <hello-world name="Lily."></hello-world>
+        <button @click="hello">Hello</button>
       </div>
     `
   }
+
+  hello () {
+    console.log('Hello')
+  }
 }
 
-Lily.mount(App)
+Lily.mount(MainView)
