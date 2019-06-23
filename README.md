@@ -19,6 +19,40 @@ Then download a seed project (boilerplate)
 $ lily my-app
 ```
 
+Example:
+
+```js
+import Lily from '//unpkg.com/lily'
+import TopBar from './components/topbar.js'
+
+class MainView extends Lily {
+  name () {
+    return 'main-view'
+  }
+
+  components () {
+    return {
+      'top-bar': TopBar
+    }
+  }
+
+  template () {
+    return `
+      <div class="app">
+        <top-bar></top-bar>
+        <button @click="hello">Hello</button>
+      </div>
+    `
+  }
+
+  hello () {
+    console.log('Hello')
+  }
+}
+
+Lily.mount(MainView)
+```
+
 Cheers
 
 [![js-standard-style](https://cdn.rawgit.com/standard/standard/master/badge.svg)](http://standardjs.com)
