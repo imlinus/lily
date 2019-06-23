@@ -1,8 +1,8 @@
 import Component from './component.js'
 
 class Lily {
-  constructor (el) {
-    return new Component(this)
+  constructor (props) {
+    return new Component(this, props)
   }
 
   static mount (app) {
