@@ -1,7 +1,9 @@
+import { observe, watcher } from './observe.js'
+
 class Component {
   constructor (vm, $props) {
     const {
-      name,
+      data,
       props,
       components,
       template,
@@ -13,12 +15,13 @@ class Component {
     this.$vm = vm
 
     // Name
-    if (!name) throw new Error('You need a name :-D')
-    this.name = name()
+    this.name = vm.name
 
     // Template
     if (!template) throw new Error('You need a template :-D')
     this.template = this.html(template())
+
+    if (data) this.data = observe(data())
 
     // Props
     if (props) {
@@ -34,7 +37,17 @@ class Component {
     }
 
     // Components
-    if (components) this.components = components()
+    if (components) {
+      let data = components()
+      let obj = {}
+
+      Object.keys(data).forEach(key => {
+        const kebab = key.split(/(?=[A-Z])/).join('-').toLowerCase()
+        obj[kebab] = data[key]
+      })
+
+      this.components = obj
+    }
 
     // LifeCycle Hooks
     if (beforeMount) this.beforeMount = beforeMount
@@ -112,9 +125,30 @@ class Component {
       const data = { el: attr.ownerElement, key: attr.nodeValue, exp: attr.nodeName }
       const { el, key, exp } = data
 
-      // if (/model/.test(exp)) return this.model(el, key, exp)
+      console.log(el, key, exp)
+
+      if (/model/.test(exp)) return this.model(el, key, exp)
       if (/@/.test(exp)) return this.on(el, key, exp)
     }, [])
+  }
+
+  model (el, key, exp) {
+    console.log('MODELK', el, key, exp)
+    // el.addEventListener('input', () => {
+    //   console.log(el.value)
+    //   // this.data[key] = el.value
+    // })
+
+    // document.body.addEventListener('input', e => {
+    //   if (el.isEqualNode(e.target)) {
+    //     console.log(this.data[key], key)
+    //     // this.data[key] = el.value
+    //   }
+    // })
+
+    // return el.value = this.data[key].constructor === Object
+    //   ? ''
+    //   : this.data[key]
   }
 
   on (node, key, exp) {
@@ -132,6 +166,10 @@ class Component {
 
     if (this.data) {
       node.textContent = this.data[key]
+
+      watcher(this.data, data => {
+        node.textContent = data[key]
+      })
     } else if (this.props) {
       node.textContent = text.replace(regx, (this.props[key].value
         ? this.props[key].value
