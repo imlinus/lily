@@ -13,8 +13,14 @@ class MainView extends Lily {
     return html`
       <div class="app">
         <h1>Hej, ${title}</h1>
+        <input type="text" model="title" />
+        <button @click="hello">Hello</button>
       </div>
     `
+  }
+
+  hello () {
+    console.log('Hello')
   }
 }
 

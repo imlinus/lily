@@ -1,9 +1,79 @@
-import Component from './component.js'
+import observe from './observe.js'
 
 class Lily {
-  constructor (props) {
+  constructor (el, $props) {
+    const { data, props, components, template } = this.__proto__
+
     this.$name = this.constructor.name.split(/(?=[A-Z])/).join('-').toLowerCase()
-    return new Component(this, props)
+    this.$parent = (el && el instanceof HTMLElement ? el : el = document.body)
+
+    if (data) {
+      this.$data = observe(data(), state => {
+        if (state) {
+          console.log(state)
+          // this.render()
+          // this.$template = this.html(template(this.values, this.$data).flat(Infinity).join(''))
+          // this.state = state
+        }
+      })
+    }
+
+    // Template
+    if (!template) throw new Error('You need a template')
+    this.$template = this.html(template(this.values, this.$data).flat(Infinity).join(''))
+
+    this.nodes()
+    this.render()
+
+    console.log(this)
+  }
+
+  values (strings, ...values) {
+    return strings.flatMap(str => [str].concat(values.shift()))
+  }
+
+  html (html) {
+    if (!html) return
+    const el = document.createElement('html')
+    el.innerHTML = html.trim()
+    return el.children[1].firstChild
+  }
+
+  render () {
+    this.$parent.localName === 'body'
+      ? this.$parent.appendChild(this.$template)
+      : this.$parent.parentNode.replaceChild(this.$template, this.$parent)
+  }
+
+  nodes () {
+    this.$template.parentNode.querySelectorAll('*')
+      .forEach(node => this.checkAttrs(node.attributes))
+  }
+
+  checkAttrs (attrs) {
+    return Object.values(attrs).reduce((n, attr) => {
+      const data = { el: attr.ownerElement, key: attr.nodeValue, exp: attr.nodeName }
+      const { el, key, exp } = data
+
+      if (/model/.test(exp)) return this.model(el, key, exp)
+      if (/@/.test(exp)) return this.on(el, key, exp)
+    }, [])
+  }
+
+  model (el, key, exp) {
+    el.addEventListener('input', () => {
+      this.$data[key] = el.value
+    })
+
+    return el.value = this.$data[key]
+  }
+
+  on (el, key, exp) {
+    const evt = exp.substr(1)
+
+    el.addEventListener(evt, () => {
+      if (this.__proto__[key]) this.__proto__[key](event)
+    })
   }
 
   static mount (app) {
