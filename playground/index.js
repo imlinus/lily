@@ -7,16 +7,7 @@ class Lily {
     this.$name = this.constructor.name.split(/(?=[A-Z])/).join('-').toLowerCase()
     this.$parent = (el && el instanceof HTMLElement ? el : el = document.body)
 
-    if (data) {
-      this.$data = observe(data(), state => {
-        if (state) {
-          console.log(state)
-          // this.render()
-          // this.$template = this.html(template(this.values, this.$data).flat(Infinity).join(''))
-          // this.state = state
-        }
-      })
-    }
+    if (data) this.$data = this.proxy(data())
 
     // Template
     if (!template) throw new Error('You need a template')
@@ -28,8 +19,28 @@ class Lily {
     console.log(this)
   }
 
+  proxy (data) {
+    const that = this
+
+    return new Proxy(data, {
+      get (obj, key) {
+        return obj[key]
+      },
+      set (obj, key, val) {
+        if (obj[key] !== val) {
+          obj[key] = val
+          console.log(obj[key])
+        }
+  
+        return true
+      }
+    })
+  }
+
   values (strings, ...values) {
-    return strings.flatMap(str => [str].concat(values.shift()))
+    return strings.flatMap(str => {
+      return [str].concat(values.shift())
+    })
   }
 
   html (html) {
@@ -40,6 +51,8 @@ class Lily {
   }
 
   render () {
+    this.$parent.innerHTML = ''
+
     this.$parent.localName === 'body'
       ? this.$parent.appendChild(this.$template)
       : this.$parent.parentNode.replaceChild(this.$template, this.$parent)

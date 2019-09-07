@@ -1,6 +1,6 @@
 import Lily from './index.js'
 
-class MainView extends Lily {
+class App extends Lily {
   data () {
     return {
       title: 'Världen'
@@ -24,4 +24,4 @@ class MainView extends Lily {
   }
 }
 
-Lily.mount(MainView)
+Lily.mount(App)
