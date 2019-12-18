@@ -1,56 +1,34 @@
 # Lily.js
 
 This is just my Hobby UI framework, not done by a long shot :P
-I'm just trying to combine (what I think is) the best parts from Vue and React and make it in to a "true" WebComponents based framework (so mostly a webcomponents wrapper with two-way bindings through proxy :-D)
-
-Right now I'm trying to get my head around `WebComponents` & `Proxy`
-
-Check the [/docs](https://github.com/imlinus/lily/tree/master/docs) directory for a "working" example
-
-Wanna try it out?
-
-Install CLI tool
-```
-$ npm i -g lily-cli
-```
-
-Then download a seed project (boilerplate)
-```
-$ lily my-app
-```
-
-Example:
 
 ```js
-import Lily from '//unpkg.com/lily'
-import TopBar from './components/topbar.js'
+import { mount, Component } from '//unpkg.com/lily'
 
-class MainView extends Lily {
-  name () {
-    return 'main-view'
-  }
-
-  components () {
+class App extends Component {
+  state () {
     return {
-      'top-bar': TopBar
+      title: 'Hello, World.'
     }
-  }
-
-  template () {
-    return `
-      <div class="app">
-        <top-bar></top-bar>
-        <button @click="hello">Hello</button>
-      </div>
-    `
   }
 
   hello () {
     console.log('Hello')
   }
+
+  template (html) {
+    const { title } = this.$state
+
+    return html`
+      <div>
+        <h1>${title}</h1>
+        <button @click="hello">Hello</button>
+      </div>
+    `
+  }
 }
 
-Lily.mount(MainView)
+mount(App)
 ```
 
 Cheers
