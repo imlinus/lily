@@ -1,21 +1,11 @@
+import PubSub from './pubsub.js'
+
 class Component {
-  constructor () {
-    this.$state = this.initializeProxy()
-
-    if (this.state) {
-      this.setState(this.state())
-    }
-
-    if (this.template) {
-      this.$template = this.toHTML(this.template(this.html))
-    }
-
-    this.nodes()
-    this.render()
-  }
-
-  initializeProxy () {
-    return new Proxy({}, {
+  constructor (el) {
+    const self = this
+    this.$el = (el && el instanceof HTMLElement ? el : el = document.body)
+    this.$events = new PubSub()
+    this.$state = new Proxy({}, {
       get (state, key) {
         return state[key]
       },
@@ -23,11 +13,25 @@ class Component {
       set (state, key, value) {
         if (state[key] !== value) {
           state[key] = value
+          self.$events.emit('stateChange', value)
         }
 
         return true
       }
     })
+
+    if (this.state) {
+      this.setState(this.state())
+    }
+
+    this.mount()
+  }
+
+  mount () {
+    this.$template = this.toHTML(this.template())
+    this.walkNodes(this.$template)
+    this.nodes()
+    this.render()
   }
 
   setState (state) {
@@ -36,14 +40,6 @@ class Component {
         this.$state[key] = state[key]
       }
     }
-  }
-
-  html ([first, ...strings], ...values) {
-    // https://github.com/stasm/innerself/
-    return values.reduce((acc, cur) =>
-      acc.concat(cur, strings.shift()), [first])
-        .filter(x => x && x !== true || x === 0)
-        .join('')
   }
 
   toHTML (html) {
@@ -63,21 +59,57 @@ class Component {
       const data = { node: attr.ownerElement, key: attr.nodeValue, expression: attr.nodeName }
       const { node, key, expression } = data
 
+      if (/model/.test(expression)) return this.model(node, key, expression)
       if (/@/.test(expression)) return this.on(node, key, expression)
     }, [])
+  }
+
+  walkNodes (node) {
+    if (!node) return
+
+    node.childNodes.forEach(child => {
+      const regx = /\{\{(.*)\}\}/
+      const text = child.textContent
+
+      if (regx.test(text)) {
+        this.text(child, regx.exec(text)[1].trim())
+      }
+
+      if (child.childNodes && child.childNodes.length !== 0) {
+        this.walkNodes(child)
+      }
+    })
+  }
+
+  model (node, key, expression) {
+    node.addEventListener('input', () => {
+      this.$state[key] = node.value
+    })
+  
+    return node.value = this.$state[key]
   }
 
   on (node, key, expression) {
     const evt = expression.substr(1)
 
     node.addEventListener(evt, () => {
-      if (this.__proto__[key]) this.__proto__[key](event)
+      if (this[key]) this[key](event)
+    })
+  }
+
+  text (node, expression) {
+    const text = this.$state[expression]
+    node.textContent = text
+
+    this.$events.on('stateChange', value => {
+      node.textContent = value
     })
   }
 
   render () {
-    // I'm lazy :-D
-    document.body.appendChild(this.$template)
+    this.$el.localName === 'body'
+      ? this.$el.appendChild(this.$template)
+      : this.$el.parentNode.replaceChild(this.$template, this.$el)
   }
 }
 
