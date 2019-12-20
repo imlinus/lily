@@ -38,3 +38,4 @@ class App extends Lily.Component {
 }
 
 Lily.mount(App)
+// Lily.mount(App, document.querySelector('.app'))

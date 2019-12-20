@@ -1,6 +1,6 @@
 import Component from './component.js'
 
-const mount = app => new app()
+const mount = (app, el) => new app(el)
 
 export default {
   Component,

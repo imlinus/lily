@@ -1,24 +1,14 @@
 import PubSub from './pubsub.js'
+import observe from './observe.js'
 
 class Component {
   constructor (el) {
     const self = this
+
+    this.$name = this.constructor.name.split(/(?=[A-Z])/).join('-').toLowerCase()
     this.$el = (el && el instanceof HTMLElement ? el : el = document.body)
     this.$events = new PubSub()
-    this.$state = new Proxy({}, {
-      get (state, key) {
-        return state[key]
-      },
-
-      set (state, key, value) {
-        if (state[key] !== value) {
-          state[key] = value
-          self.$events.emit('stateChange', value)
-        }
-
-        return true
-      }
-    })
+    this.$state = observe(null, this.$events)
 
     if (this.state) {
       this.setState(this.state())
@@ -27,8 +17,6 @@ class Component {
     this.initializeComponents()
     this.mount()
     this.replaceComponents(this.$template)
-
-    console.log(this)
   }
 
   initializeComponents () {

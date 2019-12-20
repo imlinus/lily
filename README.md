@@ -2,6 +2,8 @@
 
 This is just my Hobby UI framework, not done by a long shot :P
 
+Example: https://codepen.io/imlinus/pen/abzJwVw
+
 ```js
 import Lily from '//unpkg.com/lily'
 import HelloWorld from './hello-world.js'
