@@ -1,25 +1,52 @@
 import PubSub from './pubsub.js'
-import observe from './observe.js'
 
 class Component {
-  constructor (el) {
+  constructor (node, store) {
     const self = this
 
     this.$name = this.constructor.name.split(/(?=[A-Z])/).join('-').toLowerCase()
-    this.$el = (el && el instanceof HTMLElement ? el : el = document.body)
+    this.$parent = (node && node instanceof HTMLElement ? node : node = document.body)
     this.$events = new PubSub()
-    this.$state = observe(null, this.$events)
+    this.$state = this.observe()
 
     if (this.state) {
       this.setState(this.state())
     }
 
-    this.initializeComponents()
+    if (store) {
+      this.$store = store
+
+      this.$store.events.on('stateChange', () => {
+        console.log('store statechange')
+      })
+    }
+
+    console.log(this)
+
     this.mount()
-    this.replaceComponents(this.$template)
+    this.render()
   }
 
-  initializeComponents () {
+  observe () {
+    const self = this
+
+    return new Proxy({}, {
+      get (state, key) {
+        return state[key]
+      },
+  
+      set (state, key, value) {
+        if (state[key] !== value) {
+          state[key] = value
+          self.$events.emit('stateChange', value)
+        }
+  
+        return true
+      }
+    })
+  }
+
+  mountComponents () {
     if (this.components) {
       let data = this.components()
       let $components = {}
@@ -30,28 +57,24 @@ class Component {
       })
 
       this.$components = $components
-    }
-  }
 
-  replaceComponents (node) {
-    if (!node) return
-  
-    node.childNodes.forEach(child => {
-      if (
-        child.nodeType === 1 &&
-        this.$components &&
-        this.$components.hasOwnProperty(child.localName)
-      ) {
-        new this.$components[child.localName](child)
-      }
-    })
+      this.$template.childNodes.forEach(child => {
+        if (
+          child.nodeType === 1 &&
+          this.$components &&
+          this.$components.hasOwnProperty(child.localName)
+        ) {
+          new this.$components[child.localName](child, (this.$store || null))
+        }
+      })
+    }
   }
 
   mount () {
     this.$template = this.toHTML(this.template())
     this.walkNodes(this.$template)
     this.nodes()
-    this.render()
+    this.mountComponents()
   }
 
   setState (state) {
@@ -64,9 +87,9 @@ class Component {
 
   toHTML (html) {
     if (!html) return
-    const el = document.createElement('html')
-    el.innerHTML = html.trim()
-    return el.children[1].firstChild
+    const node = document.createElement('html')
+    node.innerHTML = html.trim()
+    return node.children[1].firstChild
   }
 
   nodes () {
@@ -80,6 +103,7 @@ class Component {
       const { node, key, expression } = data
 
       if (/model/.test(expression)) return this.model(node, key, expression)
+      if (/loop/.test(expression)) return this.loop(node, key, expression)
       if (/@/.test(expression)) return this.on(node, key, expression)
     }, [])
   }
@@ -126,10 +150,34 @@ class Component {
     })
   }
 
+  loop (node, key, expression) {
+    const name = key.split('in')[1].replace(/\s/g, '')
+    const array = this.$state[name] || this.$store.state[name]
+    const parent = node.parentNode
+    
+    parent.innerHTML = ''
+
+    const replace = item => {
+      const el = document.createElement(node.localName)
+      el.className = node.className
+      el.textContent = item
+      parent.appendChild(el)
+    }
+
+    array.forEach(item => replace(item))
+    
+    if (this.$store) {
+      this.$store.events.on('stateChange', value => {
+        parent.innerHTML = ''
+        value[name].forEach(item => replace(item))
+      })
+    }
+  }
+
   render () {
-    this.$el.localName === 'body'
-      ? this.$el.appendChild(this.$template)
-      : this.$el.parentNode.replaceChild(this.$template, this.$el)
+    this.$parent.localName === 'body'
+      ? this.$parent.appendChild(this.$template)
+      : this.$parent.parentNode.replaceChild(this.$template, this.$parent)
   }
 }
 
