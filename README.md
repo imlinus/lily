@@ -3,32 +3,37 @@
 This is just my Hobby UI framework, not done by a long shot :P
 
 ```js
-import { mount, Component } from '//unpkg.com/lily'
+import Lily from '//unpkg.com/lily'
+import HelloWorld from './hello-world.js'
 
-class App extends Component {
+class App extends Lily.Component {
   state () {
     return {
       title: 'Hello, World.'
     }
   }
 
-  hello () {
-    console.log('Hello')
+  components () {
+    return {
+      HelloWorld
+    }
   }
 
-  template (html) {
+  template () {
     const { title } = this.$state
 
-    return html`
+    return /* html */`
       <div>
-        <h1>${title}</h1>
-        <button @click="hello">Hello</button>
+        <h1>{{ title }}</h1>
+        <input model="title" />
+
+        <hello-world></hello-world>
       </div>
     `
   }
 }
 
-mount(App)
+Lily.mount(App)
 ```
 
 Cheers

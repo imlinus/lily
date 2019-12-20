@@ -24,7 +24,39 @@ class Component {
       this.setState(this.state())
     }
 
+    this.initializeComponents()
     this.mount()
+    this.replaceComponents(this.$template)
+
+    console.log(this)
+  }
+
+  initializeComponents () {
+    if (this.components) {
+      let data = this.components()
+      let $components = {}
+
+      Object.keys(data).forEach(key => {
+        const kebab = key.split(/(?=[A-Z])/).join('-').toLowerCase()
+        $components[kebab] = data[key]
+      })
+
+      this.$components = $components
+    }
+  }
+
+  replaceComponents (node) {
+    if (!node) return
+  
+    node.childNodes.forEach(child => {
+      if (
+        child.nodeType === 1 &&
+        this.$components &&
+        this.$components.hasOwnProperty(child.localName)
+      ) {
+        new this.$components[child.localName](child)
+      }
+    })
   }
 
   mount () {

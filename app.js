@@ -1,14 +1,26 @@
-import { mount, Component } from './lily/index.js'
+import Lily from './lily/index.js'
 
-class App extends Component {
+class HelloWorld extends Lily.Component {
+  template () {
+    return /* html */`
+      <div>
+        <p>Hej, Världen</p>
+      </div>
+    `
+  }
+}
+
+class App extends Lily.Component {
   state () {
     return {
       title: 'Hello, World.'
     }
   }
 
-  hello () {
-    this.$state.title = 'Hello, Lily'
+  components () {
+    return {
+      HelloWorld
+    }
   }
 
   template () {
@@ -17,11 +29,12 @@ class App extends Component {
     return /* html */`
       <div>
         <h1>{{ title }}</h1>
-        <button @click="hello">Hello</button>
         <input model="title" />
+
+        <hello-world></hello-world>
       </div>
     `
   }
 }
 
-mount(App)
+Lily.mount(App)
